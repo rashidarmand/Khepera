@@ -43,6 +43,7 @@
   "chai": "^4.3.0",
   "chai-as-promised": "^7.1.1",
   "chai-bignumber": "^3.0.0",
+  "dotenv": "^8.2.0",
   "eslint": "^7.18.0",
   "eslint-config-prettier": "^7.2.0",
   "eslint-plugin-jsx-a11y": "^6.4.1",

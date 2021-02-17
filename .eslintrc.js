@@ -16,7 +16,8 @@ module.exports = {
   env: {
     browser: true,
     amd: true,
-    node: true
+    node: true,
+    mocha: true
   },
   plugins: ['simple-import-sort'],
   extends: [

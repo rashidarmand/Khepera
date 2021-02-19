@@ -5,7 +5,7 @@ const Token = artifacts.require('Token');
 
 require('chai').use(require('chai-as-promised')).should();
 
-contract('Token', ([deployer, receiver]) => {
+contract('Token', ([deployer, receiver, exchange]) => {
   let khepera;
   const name = 'Khepera';
   const symbol = 'KHEP';
@@ -73,7 +73,7 @@ contract('Token', ([deployer, receiver]) => {
     describe('failure', async () => {
       it('rejects insufficient balances', async () => {
         let invalidAmount;
-        invalidAmount = tokens(100000000); // 100 millino - greater than total supply
+        invalidAmount = tokens(100000000); // 100 million - greater than total supply
         await khepera.transfer(receiver, invalidAmount, { from: deployer }).should.be.rejectedWith(EVM_REVERT);
 
         // Attempt to transfer tokens when you have none
@@ -83,6 +83,87 @@ contract('Token', ([deployer, receiver]) => {
 
       it('rejects invalid recipients', async () => {
         await khepera.transfer(0x0, amount, { from: deployer }).should.be.rejected;
+      });
+    });
+  });
+
+  describe('approving tokens', () => {
+    let amount, result;
+
+    describe('success', async () => {
+      beforeEach(async () => {
+        amount = tokens(100);
+        result = await khepera.approve(exchange, amount, { from: deployer });
+      });
+
+      it('allocates an allowance for delegated token spending', async () => {
+        const allowance = await khepera.allowance(deployer, exchange);
+        allowance.toString().should.equal(amount);
+      });
+
+      it('emits an Approval event', async () => {
+        const log = result.logs[0];
+        const { event, args } = log;
+        event.should.equal('Approval');
+        args.owner.should.equal(deployer, 'owner is correct');
+        args.spender.should.equal(exchange, 'spender is correct');
+        args.value.toString().should.equal(amount, 'value is correct');
+      });
+    });
+
+    describe('failure', async () => {
+      it('rejects invalid spenders', async () => {
+        await khepera.approve(0x0, amount, { from: deployer }).should.be.rejected;
+      });
+    });
+  });
+
+  describe('delegated token transfers', () => {
+    let amount, result;
+
+    beforeEach(async () => {
+      amount = tokens(100);
+      await khepera.approve(exchange, amount, { from: deployer });
+    });
+
+    describe('success', async () => {
+      beforeEach(async () => {
+        result = await khepera.transferFrom(deployer, receiver, amount, { from: exchange });
+      });
+
+      it('transfers token balances', async () => {
+        let balanceOf;
+        balanceOf = await khepera.balanceOf(deployer);
+        balanceOf.toString().should.equal(tokens(999900));
+        balanceOf = await khepera.balanceOf(receiver);
+        balanceOf.toString().should.equal(tokens(100));
+      });
+
+      it('resets the allowance', async () => {
+        const allowance = await khepera.allowance(deployer, exchange);
+        allowance.toString().should.equal('0');
+      });
+
+      it('emits a Transfer event', async () => {
+        const log = result.logs[0];
+        const { event, args } = log;
+        event.should.equal('Transfer');
+        args.from.should.equal(deployer, 'from is correct');
+        args.to.should.equal(receiver, 'to is correct');
+        args.value.toString().should.equal(amount, 'value is correct');
+      });
+    });
+
+    describe('failure', async () => {
+      it('rejects insufficient amounts', async () => {
+        // Attempt to transfer too many tokens
+        const invalidAmount = tokens(100000000);
+        await khepera
+          .transferFrom(deployer, receiver, invalidAmount, { from: exchange })
+          .should.be.rejectedWith(EVM_REVERT);
+      });
+      it('rejects invalid recipients', async () => {
+        await khepera.transferFrom(deployer, 0x0, amount, { from: exchange }).should.be.rejected;
       });
     });
   });

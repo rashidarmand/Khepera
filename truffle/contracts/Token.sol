@@ -12,9 +12,12 @@ contract Token {
 	uint256 public totalSupply;
 	// Track Balances	
 	mapping(address => uint256) public balanceOf;
+	// Tracks the amount of tokens the exchange is allowed to spend on behalf of the sender
+	mapping(address => mapping(address => uint256)) public allowance;
 
 	// Events
 	event Transfer(address indexed from, address indexed to, uint256 value);
+	event Approval(address indexed owner, address indexed spender, uint256 value);
 
 	constructor() public {
 		totalSupply = 1000000 * (10 ** decimals);
@@ -23,14 +26,35 @@ contract Token {
 
 	// Send Tokens
 	function transfer(address _to, uint256 _value) public returns (bool success) {
-		require(_to != address(0));
+		// sender has at least the amount of tokens they are trying to send
 		require(balanceOf[msg.sender] >= _value);
+		_transfer(msg.sender, _to, _value);
+		return true;
+	}
 
-		balanceOf[msg.sender] = balanceOf[msg.sender].sub(_value);
+	function _transfer(address _from, address _to, uint256 _value) internal {
+		require(_to != address(0)); // valid address
+
+		balanceOf[_from] = balanceOf[_from].sub(_value);
 		balanceOf[_to] = balanceOf[_to].add(_value);
 
-		emit Transfer(msg.sender, _to, _value);
+		emit Transfer(_from, _to, _value);
+	}
 
+	// Approve Tokens
+	function approve(address _spender, uint256 _value) public returns (bool success) {
+		require(_spender != address(0)); // valid address
+		allowance[msg.sender][_spender] = _value;
+		emit Approval(msg.sender, _spender, _value);
+		return true;
+	}
+
+	// Delegated Token Transfer
+	function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+		require(_value <= balanceOf[_from]);
+		require(_value <= allowance[_from][msg.sender]);
+		allowance[_from][msg.sender] = allowance[_from][msg.sender].sub(_value);
+		_transfer(_from, _to, _value);
 		return true;
 	}
 

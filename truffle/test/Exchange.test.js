@@ -49,8 +49,7 @@ contract('Exchange', ([deployer, feeAccount, user1]) => {
         const balance = await exchange.tokens(ETHER_ADDRESS, user1);
         balance.toString().should.equal(amount);
       });
-      // TODO: create helper function that checks for events
-      it('emits a Deposit event', async () => {
+      it('emits a Deposit event', () => {
         const log = result.logs[0];
         const { event, args } = log;
         event.should.equal('Deposit');
@@ -62,6 +61,41 @@ contract('Exchange', ([deployer, feeAccount, user1]) => {
     });
 
     // describe('failure', () => {});
+  });
+
+  describe('withdrawing ether', () => {
+    let result, amount;
+
+    beforeEach(async () => {
+      amount = ether(1);
+      result = await exchange.depositEther({ from: user1, value: amount });
+    });
+
+    describe('success', () => {
+      beforeEach(async () => {
+        result = await exchange.withdrawEther(amount, { from: user1 });
+      });
+
+      it('withdraws Ether funds', async () => {
+        const balance = await exchange.tokens(ETHER_ADDRESS, user1);
+        balance.toString().should.equal('0');
+      });
+      it('emits a Withdraw event', () => {
+        const log = result.logs[0];
+        const { event, args } = log;
+        event.should.equal('Withdraw');
+        args.token.should.equal(ETHER_ADDRESS, 'token address is correct');
+        args.user.should.equal(user1, 'user address is correct');
+        args.amount.toString().should.equal(amount, 'amount is correct');
+        args.balance.toString().should.equal('0', 'balance is correct');
+      });
+    });
+
+    describe('failure', () => {
+      it('rejects withdraws for insufficient balances', async () => {
+        await exchange.withdrawEther(ether(100), { from: user1 }).should.be.rejectedWith(EVM_REVERT);
+      });
+    });
   });
 
   describe('depositing tokens', () => {
@@ -83,8 +117,7 @@ contract('Exchange', ([deployer, feeAccount, user1]) => {
         balance = await exchange.tokens(token.address, user1);
         balance.toString().should.equal(amount);
       });
-      // TODO: create helper function that checks for events
-      it('emits a Deposit event', async () => {
+      it('emits a Deposit event', () => {
         const log = result.logs[0];
         const { event, args } = log;
         event.should.equal('Deposit');
@@ -103,6 +136,59 @@ contract('Exchange', ([deployer, feeAccount, user1]) => {
         // Don't approve any tokens before depositing
         await exchange.depositToken(token.address, amount, { from: user1 }).should.be.rejectedWith(EVM_REVERT);
       });
+    });
+  });
+
+  describe('withdrawing tokens', () => {
+    let result, amount;
+
+    describe('success', () => {
+      beforeEach(async () => {
+        // Deposit tokens first
+        amount = tokens(10);
+        await token.approve(exchange.address, amount, { from: user1 });
+        await exchange.depositToken(token.address, amount, { from: user1 });
+
+        // Withdraw tokens
+        result = await exchange.withdrawToken(token.address, amount, { from: user1 });
+      });
+
+      it('withdraws token funds', async () => {
+        const balance = await exchange.tokens(token.address, user1);
+        balance.toString().should.equal('0');
+      });
+      it('emits a Withdraw event', () => {
+        const log = result.logs[0];
+        const { event, args } = log;
+        event.should.equal('Withdraw');
+        args.token.should.equal(token.address, 'token address is correct');
+        args.user.should.equal(user1, 'user address is correct');
+        args.amount.toString().should.equal(amount, 'amount is correct');
+        args.balance.toString().should.equal('0', 'balance is correct');
+      });
+    });
+
+    describe('failure', () => {
+      it('rejects withdraws for Ether', async () => {
+        await exchange.withdrawToken(ETHER_ADDRESS, amount, { from: user1 }).should.be.rejectedWith(EVM_REVERT);
+      });
+      it('rejects withdraws for insufficient balances', async () => {
+        await exchange.withdrawToken(token.address, amount, { from: user1 }).should.be.rejectedWith(EVM_REVERT);
+      });
+    });
+  });
+
+  describe('checking balances', () => {
+    let amount;
+
+    beforeEach(() => {
+      amount = ether(1);
+      exchange.depositEther({ from: user1, value: amount });
+    });
+
+    it('returns user balance', async () => {
+      const result = await exchange.balanceOf(ETHER_ADDRESS, user1);
+      result.toString().should.be.equal(amount);
     });
   });
 });

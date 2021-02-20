@@ -8,7 +8,10 @@
   "build": "next build",
   "start": "next start",
   "lint": "eslint --fix .",
-  "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc"
+  "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc",
+	"truffle:t": "cd truffle && truffle test",
+	"truffle:t:token": "cd truffle && truffle test ./test/Token.test.js",
+	"truffle:t:exchange": "cd truffle && truffle test ./test/Exchange.test.js"
  },
  "dependencies": {
   "@chakra-ui/react": "^1.3.3",

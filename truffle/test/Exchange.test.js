@@ -6,7 +6,7 @@ const Exchange = artifacts.require('Exchange');
 
 require('chai').use(require('chai-as-promised')).should();
 
-contract('Exchange', ([deployer, feeAccount, user1]) => {
+contract('Exchange', ([deployer, feeAccount, user1, user2]) => {
   let exchange, token;
   const feePercent = 1;
 
@@ -189,6 +189,94 @@ contract('Exchange', ([deployer, feeAccount, user1]) => {
     it('returns user balance', async () => {
       const result = await exchange.balanceOf(ETHER_ADDRESS, user1);
       result.toString().should.be.equal(amount);
+    });
+  });
+
+  describe('making orders', () => {
+    let result, amountGet, amountGive;
+
+    beforeEach(async () => {
+      amountGet = tokens(1);
+      amountGive = ether(1);
+      result = await exchange.makeOrder(token.address, amountGet, ETHER_ADDRESS, amountGive, { from: user1 });
+    });
+
+    it('tracks the newly created order', async () => {
+      const orderCount = await exchange.orderCount();
+      orderCount.toString().should.equal('1');
+      const order = await exchange.orders('1');
+      order.id.toString().should.equal('1', 'id is correct');
+      order.user.should.equal(user1, 'user is correct');
+      order.tokenGet.should.equal(token.address, 'tokenGet is correct');
+      order.amountGet.toString().should.equal(amountGet, 'amountGet is correct');
+      order.tokenGive.should.equal(ETHER_ADDRESS, 'tokenGive is correct');
+      order.amountGive.toString().should.equal(amountGive, 'amountGive is correct');
+      order.timestamp.toString().length.should.be.at.least(1, 'timestamp is present');
+    });
+
+    it('emits an Order event', () => {
+      const log = result.logs[0];
+      const { event, args } = log;
+      event.should.equal('Order');
+      args.id.toString().should.equal('1', 'id is correct');
+      args.user.should.equal(user1, 'user is correct');
+      args.tokenGet.should.equal(token.address, 'tokenGet is correct');
+      args.amountGet.toString().should.equal(amountGet, 'amountGet is correct');
+      args.tokenGive.should.equal(ETHER_ADDRESS, 'tokenGive is correct');
+      args.amountGive.toString().should.equal(amountGive, 'amountGive is correct');
+      args.timestamp.toString().length.should.be.at.least(1, 'timestamp is present');
+    });
+  });
+
+  describe('order actions', () => {
+    let amountGet, amountGive;
+
+    beforeEach(async () => {
+      amountGet = tokens(1);
+      amountGive = ether(1);
+      // user1 deposits ether
+      await exchange.depositEther({ from: user1, value: amountGive });
+      // user1 makes an order to buy tokens with Ether
+      await exchange.makeOrder(token.address, amountGet, ETHER_ADDRESS, amountGive, { from: user1 });
+    });
+
+    describe('cancelling orders', () => {
+      let result;
+
+      describe('success', () => {
+        beforeEach(async () => {
+          result = await exchange.cancelOrder('1', { from: user1 });
+        });
+
+        it('updates cancelled orders', async () => {
+          const cancelledOrder = await exchange.cancelledOrders(1);
+          cancelledOrder.should.equal(true);
+        });
+
+        it('emits a Cancel event', () => {
+          const log = result.logs[0];
+          const { event, args } = log;
+          event.should.equal('Cancel');
+          args.id.toString().should.equal('1', 'id is correct');
+          args.user.should.equal(user1, 'user is correct');
+          args.tokenGet.should.equal(token.address, 'tokenGet is correct');
+          args.amountGet.toString().should.equal(amountGet, 'amountGet is correct');
+          args.tokenGive.should.equal(ETHER_ADDRESS, 'tokenGive is correct');
+          args.amountGive.toString().should.equal(amountGive, 'amountGive is correct');
+          args.timestamp.toString().length.should.be.at.least(1, 'timestamp is present');
+        });
+      });
+
+      describe('failure', () => {
+        it('rejects invalid order ids', async () => {
+          const invalidOrderId = 99999;
+          await exchange.cancelOrder(invalidOrderId, { from: user1 }).should.be.rejectedWith(EVM_REVERT);
+        });
+        it('rejects unauthorized cancelations', async () => {
+          // Trying to cancel another user's order
+          await exchange.cancelOrder('1', { from: user2 }).should.be.rejectedWith(EVM_REVERT);
+        });
+      });
     });
   });
 });

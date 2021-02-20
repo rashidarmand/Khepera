@@ -46,7 +46,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
   describe('sending tokens', () => {
     let amount, result;
 
-    describe('success', async () => {
+    describe('success', () => {
       beforeEach(async () => {
         amount = tokens(100);
         result = await token.transfer(receiver, amount, { from: deployer });
@@ -60,7 +60,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
         balanceOf.toString().should.equal(tokens(100));
       });
 
-      it('emits a Transfer event', async () => {
+      it('emits a Transfer event', () => {
         const log = result.logs[0];
         const { event, args } = log;
         event.should.equal('Transfer');
@@ -70,7 +70,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
       });
     });
 
-    describe('failure', async () => {
+    describe('failure', () => {
       it('rejects insufficient balances', async () => {
         let invalidAmount;
         invalidAmount = tokens(100000000); // 100 million - greater than total supply
@@ -90,7 +90,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
   describe('approving tokens', () => {
     let amount, result;
 
-    describe('success', async () => {
+    describe('success', () => {
       beforeEach(async () => {
         amount = tokens(100);
         result = await token.approve(exchange, amount, { from: deployer });
@@ -101,7 +101,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
         allowance.toString().should.equal(amount);
       });
 
-      it('emits an Approval event', async () => {
+      it('emits an Approval event', () => {
         const log = result.logs[0];
         const { event, args } = log;
         event.should.equal('Approval');
@@ -111,7 +111,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
       });
     });
 
-    describe('failure', async () => {
+    describe('failure', () => {
       it('rejects invalid spenders', async () => {
         await token.approve(0x0, amount, { from: deployer }).should.be.rejected;
       });
@@ -126,7 +126,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
       await token.approve(exchange, amount, { from: deployer });
     });
 
-    describe('success', async () => {
+    describe('success', () => {
       beforeEach(async () => {
         result = await token.transferFrom(deployer, receiver, amount, { from: exchange });
       });
@@ -144,7 +144,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
         allowance.toString().should.equal('0');
       });
 
-      it('emits a Transfer event', async () => {
+      it('emits a Transfer event', () => {
         const log = result.logs[0];
         const { event, args } = log;
         event.should.equal('Transfer');
@@ -154,7 +154,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
       });
     });
 
-    describe('failure', async () => {
+    describe('failure', () => {
       it('rejects insufficient amounts', async () => {
         // Attempt to transfer too many tokens
         const invalidAmount = tokens(100000000);

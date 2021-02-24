@@ -1,4 +1,6 @@
-require('babel-register');
+require('babel-register')({
+  presets: ['env', 'stage-2', 'stage-3']
+});
 require('babel-polyfill');
 require('dotenv').config();
 

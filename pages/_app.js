@@ -3,8 +3,12 @@ import '../styles/globals.scss';
 import { ChakraProvider } from '@chakra-ui/react';
 import { css, Global } from '@emotion/react';
 import theme from '@lib/theme';
+import { useStore } from '@store/store';
+import { Provider as StoreProvider } from 'react-redux';
 
 function MyApp({ Component, pageProps }) {
+  const store = useStore(pageProps.initialReduxState);
+
   return (
     <ChakraProvider theme={theme}>
       <Global
@@ -20,7 +24,9 @@ function MyApp({ Component, pageProps }) {
           }
         `}
       />
-      <Component {...pageProps} />
+      <StoreProvider store={store}>
+        <Component {...pageProps} />
+      </StoreProvider>
     </ChakraProvider>
   );
 }

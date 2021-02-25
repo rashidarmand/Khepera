@@ -1,34 +1,39 @@
-import { Grid, GridItem, Heading, useBreakpointValue } from '@chakra-ui/react';
-import Balance from '@components/Balance';
-import MyTransactions from '@components/MyTransactions';
-import NewOrder from '@components/NewOrder';
-import OrderBook from '@components/OrderBook';
-import PriceChart from '@components/PriceChart';
-import Trades from '@components/Trades';
-import Token from '@truffle/abis/Token.json';
+import { Grid, Heading } from '@chakra-ui/react';
+import Navbar from '@components/Navbar';
+import { loadExchange, loadToken, loadWeb3, loadWeb3Account } from '@store/effects';
+import { contractsLoadedSelector } from '@store/selectors';
 import { colorLog } from '@utils/helpers';
+import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import { useEffect } from 'react';
-import Web3 from 'web3';
+import { useDispatch, useSelector } from 'react-redux';
 
-const loadBlockchainData = async () => {
-  const web3 = new Web3(Web3.givenProvider || 'http://localhost:7545');
-  // const web3 = new Web3(window.ethereum);
-  await window.ethereum.enable();
-  const networkId = await web3.eth.net.getId();
-  const accounts = await web3.eth.getAccounts();
-  const token = new web3.eth.Contract(Token.abi, Token?.networks[networkId]?.address);
-  const totalSupply = await token.methods.totalSupply().call();
-  colorLog('Token total supply:: ', totalSupply);
-};
+const Exchange = dynamic(() => import('@components/Exchange'), { ssr: false });
 
 const Home = () => {
-  const mediumScreenAndUp = useBreakpointValue({ md: true, base: false });
-  const gridTemplateColumns = useBreakpointValue({ md: '1fr 1fr 2fr 1fr', base: '1fr' });
-  const gridTemplateRows = useBreakpointValue({ md: 'repeat(2, 1fr)', base: 'repeat(6, 1fr)' });
+  const dispatch = useDispatch();
+  const contractsLoaded = useSelector(contractsLoadedSelector);
+
+  const loadBlockchainData = async (dispatch) => {
+    const web3 = await loadWeb3(dispatch);
+    const networkId = await web3.eth.net.getId();
+    await loadWeb3Account(web3, dispatch);
+    const token = await loadToken(web3, networkId, dispatch);
+    //TODO: make error object that contains all errors as keys and functions that respond to them as values
+    if (!token) {
+      alert('Token contract not deployed to the current network. Please select another network with Metamask.');
+      return;
+    }
+    const exchange = await loadExchange(web3, networkId, dispatch);
+    if (!exchange) {
+      alert('Exchange contract not deployed to the current network. Please select another network with Metamask.');
+      return;
+    }
+  };
 
   useEffect(async () => {
-    await loadBlockchainData();
+    await loadBlockchainData(dispatch);
+    colorLog('contractsLoaded?? ', contractsLoaded);
   }, []);
 
   return (
@@ -45,79 +50,9 @@ const Home = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <GridItem
-        bgGradient="linear-gradient(120deg, #7028e4 0%, #e5b2ca 55%, #7028e4 100%)"
-        w="100%"
-        p={4}
-        color="white"
-        shadow="md"
-      >
-        <Heading size="lg">Khepera Token Exchange</Heading>
-      </GridItem>
+      <Navbar />
 
-      <GridItem>
-        <Grid
-          h="100%"
-          p="4"
-          templateRows={gridTemplateRows}
-          templateColumns={gridTemplateColumns}
-          gap={4}
-          color="gray.700"
-        >
-          <GridItem colSpan={mediumScreenAndUp && 1} colStart={mediumScreenAndUp && 1} bg="pink.50" shadow="lg" p="2">
-            <Balance />
-          </GridItem>
-
-          <GridItem
-            colSpan={mediumScreenAndUp && 1}
-            rowStart={mediumScreenAndUp && 2}
-            colStart={mediumScreenAndUp && 1}
-            bg="pink.50"
-            shadow="lg"
-            p="2"
-          >
-            <NewOrder />
-          </GridItem>
-
-          <GridItem colSpan={1} rowSpan={mediumScreenAndUp && 2} bg="pink.50" shadow="lg" p="2">
-            <OrderBook />
-          </GridItem>
-
-          <GridItem
-            colSpan={mediumScreenAndUp && 1}
-            colStart={mediumScreenAndUp && 3}
-            rowSpan={mediumScreenAndUp && 1}
-            bg="pink.50"
-            shadow="lg"
-            p="2"
-          >
-            <PriceChart />
-          </GridItem>
-
-          <GridItem
-            colSpan={1}
-            colStart={mediumScreenAndUp && 3}
-            rowSpan={mediumScreenAndUp && 1}
-            rowStart={mediumScreenAndUp && 2}
-            bg="pink.50"
-            shadow="lg"
-            p="2"
-          >
-            <MyTransactions />
-          </GridItem>
-
-          <GridItem
-            colSpan={1}
-            colStart={mediumScreenAndUp && 4}
-            rowSpan={mediumScreenAndUp && 2}
-            bg="pink.50"
-            shadow="lg"
-            p="2"
-          >
-            <Trades />
-          </GridItem>
-        </Grid>
-      </GridItem>
+      {contractsLoaded ? <Exchange /> : <Heading>Contracts Not Loaded</Heading>}
     </Grid>
   );
 };

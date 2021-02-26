@@ -2,10 +2,12 @@ import { ether, ETHER_ADDRESS, tokens } from '@utils/helpers';
 import dayjs from 'dayjs';
 
 //  TODO: convert to typescript enums
-export const ORDER_TYPES = {
+export const ORDER_DECORATION_TYPE = {
   FILLED: 'FILLED',
   CANCELLED: 'CANCELLED',
   ORDER_BOOK: 'ORDER_BOOK',
+  USER_FILLED: 'USER_FILLED',
+  USER_OPEN: 'USER_OPEN',
   ALL: 'ALL'
 };
 
@@ -14,17 +16,24 @@ export const TOKEN_PRICE_COLORS = {
   RED: 'red'
 };
 
-export const decorateOrders = (orders, orderType = null) => {
+export const decorateOrders = (orders, orderType = null, ...rest) => {
   let previousOrder; // track previous order to compare history
 
   const decoratedOrders = orders.map((order) => {
     order = decorateOrder(order);
-    if (orderType === ORDER_TYPES.FILLED) {
+    if (orderType === ORDER_DECORATION_TYPE.FILLED) {
       order = decorateFilledOrder(order, previousOrder);
       previousOrder = order; // update the previous order once it's decorated
     }
-    if (orderType === ORDER_TYPES.ORDER_BOOK) {
+    if (orderType === ORDER_DECORATION_TYPE.ORDER_BOOK) {
       order = decorateOrderBookOrder(order);
+    }
+    if (orderType === ORDER_DECORATION_TYPE.USER_FILLED) {
+      const account = rest.account;
+      order = decorateCurrentUserFilledOrder(order, account);
+    }
+    if (orderType === ORDER_DECORATION_TYPE.USER_OPEN) {
+      order = decorateCurrentUserOpenOrder(order);
     }
     return order;
   });
@@ -60,6 +69,33 @@ const decorateOrderBookOrder = (order) => {
     orderType,
     orderTypeColor: orderType === 'buy' ? TOKEN_PRICE_COLORS.GREEN : TOKEN_PRICE_COLORS.RED,
     orderFillClass: orderType === 'buy' ? 'sell' : 'buy'
+  };
+};
+
+const decorateCurrentUserFilledOrder = (order, account) => {
+  const currentUserOrder = order.user === account;
+  let orderType;
+
+  if (currentUserOrder) {
+    orderType = order.tokenGive === ETHER_ADDRESS ? 'buy' : 'sell';
+  } else {
+    orderType = order.tokenGive === ETHER_ADDRESS ? 'sell' : 'buy';
+  }
+
+  return {
+    ...order,
+    orderType,
+    orderTypeColor: orderType === 'buy' ? TOKEN_PRICE_COLORS.GREEN : TOKEN_PRICE_COLORS.RED,
+    orderSign: orderType === 'buy' ? '+' : '-'
+  };
+};
+
+const decorateCurrentUserOpenOrder = (order) => {
+  const orderType = order.tokenGive === ETHER_ADDRESS ? 'buy' : 'sell';
+  return {
+    ...order,
+    orderType,
+    orderTypeColor: orderType === 'buy' ? TOKEN_PRICE_COLORS.GREEN : TOKEN_PRICE_COLORS.RED
   };
 };
 

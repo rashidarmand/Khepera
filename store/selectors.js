@@ -1,4 +1,4 @@
-import { decorateOrders, ORDER_TYPES } from '@utils/order-decorator-helpers';
+import { decorateOrders, ORDER_DECORATION_TYPE } from '@utils/order-decorator-helpers';
 import { get, groupBy, reject } from 'lodash';
 import { createSelector } from 'reselect';
 
@@ -18,7 +18,7 @@ export const filledOrdersLoadedSelector = (state) => get(state, 'exchange.filled
 export const filledOrdersSelector = createSelector(
   (state) => get(state, 'exchange.filledOrders.data', []),
   (orders) => {
-    const decoratedOrders = decorateOrders(orders, ORDER_TYPES.FILLED);
+    const decoratedOrders = decorateOrders(orders, ORDER_DECORATION_TYPE.FILLED);
     // Sort orders by date descending for display
     return decoratedOrders.sort((a, b) => b.timestamp - a.timestamp);
   }
@@ -44,6 +44,24 @@ export const orderBookLoadedSelector = (state) =>
   cancelledOrdersLoadedSelector(state) && filledOrdersLoadedSelector(state) && allOrdersLoadedSelector(state);
 // Create the order book
 export const orderBookSelector = createSelector(openOrders, (orders) => {
-  const decoratedOrders = decorateOrders(orders, ORDER_TYPES.ORDER_BOOK);
+  const decoratedOrders = decorateOrders(orders, ORDER_DECORATION_TYPE.ORDER_BOOK);
   return groupBy(decoratedOrders, 'orderType');
+});
+// Current User Filled Orders (My Transactions)
+export const currentUserFilledOrdersLoadedSelector = filledOrdersLoadedSelector;
+export const currentUserFilledOrdersSelector = createSelector(
+  accountSelector,
+  filledOrdersSelector,
+  (account, filledOrders) => {
+    // Find current user orders
+    const orders = filledOrders.filter((order) => order.user === account || order.userFill === account);
+    return decorateOrders(orders, ORDER_DECORATION_TYPE.USER_FILLED, account);
+  }
+);
+// Current User Open Orders (My Transactions)
+export const currentUserOpenOrdersLoadedSelector = orderBookLoadedSelector;
+export const currentUserOpenOrdersSelector = createSelector(accountSelector, openOrders, (account, orders) => {
+  orders = orders.filter((o) => o.user === account); // Filter orders created by current user
+  orders = decorateOrders(orders, ORDER_DECORATION_TYPE.USER_OPEN);
+  return orders.sort((a, b) => b.timestamp - a.timestamp);
 });

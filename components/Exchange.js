@@ -5,11 +5,26 @@ import NewOrder from '@components/NewOrder';
 import OrderBook from '@components/OrderBook';
 import PriceChart from '@components/PriceChart';
 import Trades from '@components/Trades';
+import { loadAllOrders } from '@store/effects';
+import { exchangeSelector } from '@store/selectors';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 const Exchange = () => {
   const mediumScreenAndUp = useBreakpointValue({ md: true, base: false });
   const gridTemplateColumns = useBreakpointValue({ md: '1fr 1fr 2fr 1fr', base: '1fr' });
   const gridTemplateRows = useBreakpointValue({ md: 'repeat(2, 1fr)', base: 'repeat(6, 1fr)' });
+
+  const dispatch = useDispatch();
+  const exchange = useSelector(exchangeSelector);
+
+  const loadBlockchainData = async (dispatch) => {
+    await loadAllOrders(exchange, dispatch);
+  };
+
+  useEffect(async () => {
+    await loadBlockchainData(dispatch);
+  }, []);
 
   return (
     <GridItem>

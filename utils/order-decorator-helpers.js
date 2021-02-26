@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 export const ORDER_TYPES = {
   FILLED: 'FILLED',
   CANCELLED: 'CANCELLED',
+  ORDER_BOOK: 'ORDER_BOOK',
   ALL: 'ALL'
 };
 
@@ -22,11 +23,11 @@ export const decorateOrders = (orders, orderType = null) => {
       order = decorateFilledOrder(order, previousOrder);
       previousOrder = order; // update the previous order once it's decorated
     }
+    if (orderType === ORDER_TYPES.ORDER_BOOK) {
+      order = decorateOrderBookOrder(order);
+    }
     return order;
   });
-
-  // Sort orders by date descending for display
-  decoratedOrders.sort((a, b) => b.timestamp - a.timestamp);
 
   return decoratedOrders;
 };
@@ -49,6 +50,16 @@ const decorateFilledOrder = (order, previousOrder) => {
   return {
     ...order,
     tokenPriceClass: calculateTokenPriceClass(order.tokenPrice, previousOrder)
+  };
+};
+
+const decorateOrderBookOrder = (order) => {
+  const orderType = order.tokenGive === ETHER_ADDRESS ? 'buy' : 'sell';
+  return {
+    ...order,
+    orderType,
+    orderTypeColor: orderType === 'buy' ? TOKEN_PRICE_COLORS.GREEN : TOKEN_PRICE_COLORS.RED,
+    orderFillClass: orderType === 'buy' ? 'sell' : 'buy'
   };
 };
 

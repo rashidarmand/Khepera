@@ -1,4 +1,4 @@
-import { decorateOrders, ORDER_DECORATION_TYPE } from '@utils/order-decorator-helpers';
+import { buildGraphData, decorateOrders, ORDER_DECORATION_TYPE } from '@utils/order-decorator-helpers';
 import { get, groupBy, reject } from 'lodash';
 import { createSelector } from 'reselect';
 
@@ -14,15 +14,13 @@ export const exchangeSelector = (state) => get(state, 'exchange.contract');
 export const cancelledOrdersLoadedSelector = (state) => get(state, 'exchange.cancelledOrders.loaded', false);
 export const cancelledOrdersSelector = (state) => get(state, 'exchange.cancelledOrders.data', []);
 // Filled Orders
+const filledOrders = (state) => get(state, 'exchange.filledOrders.data', []);
 export const filledOrdersLoadedSelector = (state) => get(state, 'exchange.filledOrders.loaded', false);
-export const filledOrdersSelector = createSelector(
-  (state) => get(state, 'exchange.filledOrders.data', []),
-  (orders) => {
-    const decoratedOrders = decorateOrders(orders, ORDER_DECORATION_TYPE.FILLED);
-    // Sort orders by date descending for display
-    return decoratedOrders.sort((a, b) => b.timestamp - a.timestamp);
-  }
-);
+export const filledOrdersSelector = createSelector(filledOrders, (orders) => {
+  const decoratedOrders = decorateOrders(orders, ORDER_DECORATION_TYPE.FILLED);
+  // Sort orders by date descending for display
+  return decoratedOrders.sort((a, b) => b.timestamp - a.timestamp);
+});
 // All Orders
 export const allOrdersLoadedSelector = (state) => get(state, 'exchange.allOrders.loaded', false);
 export const allOrdersSelector = (state) => get(state, 'exchange.allOrders.data', []);
@@ -52,9 +50,9 @@ export const currentUserFilledOrdersLoadedSelector = filledOrdersLoadedSelector;
 export const currentUserFilledOrdersSelector = createSelector(
   accountSelector,
   filledOrdersSelector,
-  (account, filledOrders) => {
+  (account, orders) => {
     // Find current user orders
-    const orders = filledOrders.filter((order) => order.user === account || order.userFill === account);
+    orders = orders.filter((order) => order.user === account || order.userFill === account);
     return decorateOrders(orders, ORDER_DECORATION_TYPE.USER_FILLED, account);
   }
 );
@@ -64,4 +62,24 @@ export const currentUserOpenOrdersSelector = createSelector(accountSelector, ope
   orders = orders.filter((o) => o.user === account); // Filter orders created by current user
   orders = decorateOrders(orders, ORDER_DECORATION_TYPE.USER_OPEN);
   return orders.sort((a, b) => b.timestamp - a.timestamp);
+});
+// Price Chart
+export const priceChartLoadedSelector = filledOrdersLoadedSelector;
+export const priceChartSelector = createSelector(filledOrders, (orders) => {
+  orders = decorateOrders(orders);
+  // Get last two orders for final price & price change
+  const [secondLastOrder, lastOrder] = orders.slice(orders.length - 2, orders.length);
+  // get last order price
+  const lastPrice = get(lastOrder, 'tokenPrice', 0);
+  // get second last order price
+  const secondLastPrice = get(secondLastOrder, 'tokenPrice', 0);
+  return {
+    lastPrice,
+    lastPriceChange: lastPrice >= secondLastPrice ? '+' : '-',
+    series: [
+      {
+        data: buildGraphData(orders)
+      }
+    ]
+  };
 });

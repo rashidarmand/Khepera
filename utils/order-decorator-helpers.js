@@ -1,5 +1,6 @@
 import { ether, ETHER_ADDRESS, tokens } from '@utils/helpers';
 import dayjs from 'dayjs';
+import { groupBy, maxBy, minBy } from 'lodash';
 
 //  TODO: convert to typescript enums
 export const ORDER_DECORATION_TYPE = {
@@ -134,4 +135,27 @@ const calculateTokenPrice = (etherAmount, tokenAmount) => {
   let tokenPrice = etherAmount / tokenAmount;
   tokenPrice = Math.round(tokenPrice * precision) / precision;
   return tokenPrice;
+};
+
+// TODO: more chart views than hourly
+export const buildGraphData = (orders) => {
+  // Group the orders by hour for the graph
+  orders = groupBy(orders, (o) => dayjs.unix(o.timestamp).startOf('hour').format());
+  // Get each hour where data exists
+  const hours = Object.keys(orders);
+  // Build the graph series
+  const graphData = hours.map((hour) => {
+    // Fetch all the orders from current hour
+    const group = orders[hour];
+    // Calculate open, high, low, close price values
+    const open = group[0]; // first order
+    const high = maxBy(group, 'tokenPrice'); // high price
+    const low = minBy(group, 'tokenPrice'); // low price
+    const close = group[group.length - 1]; // last order
+    return {
+      x: new Date(hour),
+      y: [open.tokenPrice, high.tokenPrice, low.tokenPrice, close.tokenPrice]
+    };
+  });
+  return graphData;
 };

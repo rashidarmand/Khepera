@@ -2,7 +2,6 @@ import { Grid, Heading } from '@chakra-ui/react';
 import Navbar from '@components/Navbar';
 import { loadExchange, loadToken, loadWeb3, loadWeb3Account } from '@store/effects';
 import { contractsLoadedSelector } from '@store/selectors';
-import { colorLog } from '@utils/helpers';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import { useEffect } from 'react';
@@ -33,7 +32,6 @@ const Home = () => {
 
   useEffect(async () => {
     await loadBlockchainData(dispatch);
-    colorLog('contractsLoaded?? ', contractsLoaded);
   }, []);
 
   return (

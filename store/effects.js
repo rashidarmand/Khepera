@@ -1,9 +1,16 @@
 import Exchange from '@truffle/abis/Exchange.json';
 import Token from '@truffle/abis/Token.json';
-import { colorLog } from '@utils/helpers';
 import Web3 from 'web3';
 
-import { exchangeLoaded, tokenLoaded, web3AccountLoaded, web3Loaded } from './actions';
+import {
+  allOrdersLoaded,
+  cancelledOrdersLoaded,
+  exchangeLoaded,
+  filledOrdersLoaded,
+  tokenLoaded,
+  web3AccountLoaded,
+  web3Loaded
+} from './actions';
 
 export const loadWeb3 = async (dispatch) => {
   if (typeof window.ethereum !== 'undefined') {
@@ -49,4 +56,22 @@ export const loadExchange = async (web3, networkId, dispatch) => {
   }
   dispatch(exchangeLoaded(exchange));
   return exchange;
+};
+
+// TODO: create helper function to only get needed data and remove 0-6 keys on individual orders
+export const loadAllOrders = async (exchange, dispatch) => {
+  // Fetch cancelled orders with the "Cancel" event stream, format them, & add them to the redux store
+  const cancelStream = await exchange.getPastEvents('Cancel', { fromBlock: 0, toBlock: 'latest' });
+  const cancelledOrders = cancelStream.map((event) => event.returnValues);
+  dispatch(cancelledOrdersLoaded(cancelledOrders));
+
+  // Fetch filled orders with the "Trade" event stream, format them, & add them to the redux store
+  const tradeStream = await exchange.getPastEvents('Trade', { fromBlock: 0, toBlock: 'latest' });
+  const filledOrders = tradeStream.map((event) => event.returnValues);
+  dispatch(filledOrdersLoaded(filledOrders));
+
+  // Fetch all orders with the "Order" event stream, format them, & add them to the redux store
+  const orderStream = await exchange.getPastEvents('Order', { fromBlock: 0, toBlock: 'latest' });
+  const allOrders = orderStream.map((event) => event.returnValues);
+  dispatch(allOrdersLoaded(allOrders));
 };

@@ -25,7 +25,13 @@ const token = (state = {}, { type, payload }) => {
 const exchange = (state = {}, { type, payload }) => {
   switch (type) {
     case types.EXCHANGE_LOADED:
-      return { ...state, loaded: true, exchange: payload };
+      return { ...state, loaded: true, contract: payload };
+    case types.CANCELLED_ORDERS_LOADED:
+      return { ...state, cancelledOrders: { loaded: true, data: payload } };
+    case types.FILLED_ORDERS_LOADED:
+      return { ...state, filledOrders: { loaded: true, data: payload } };
+    case types.ALL_ORDERS_LOADED:
+      return { ...state, allOrders: { loaded: true, data: payload } };
     default:
       return state;
   }

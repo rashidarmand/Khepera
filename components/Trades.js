@@ -1,7 +1,32 @@
-import { Heading, Table, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import { Heading, Spinner, Table, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import { filledOrdersLoadedSelector, filledOrdersSelector } from '@store/selectors';
+import { useSelector } from 'react-redux';
+
+const FilledOrderTableRows = ({ filledOrders }) => (
+  <>
+    {filledOrders.map((order) => (
+      <Tr key={order.id}>
+        <Td>{order.formattedTimestamp}</Td>
+        <Td isNumeric>{order.tokenAmount}</Td>
+        <Td color={order.tokenPriceClass} isNumeric>
+          {order.tokenPrice}
+        </Td>
+      </Tr>
+    ))}
+  </>
+);
+
+const LoadingTableRows = () => (
+  <Tr>
+    <Td colSpan="3" pt="6" textAlign="center">
+      <Spinner size="xl" />
+    </Td>
+  </Tr>
+);
 
 const Trades = () => {
-  const _numberOfOrders = Array.from({ length: 6 }, (_, i) => i);
+  const filledOrders = useSelector(filledOrdersSelector);
+  const filledOrdersLoaded = useSelector(filledOrdersLoadedSelector);
 
   return (
     <>
@@ -18,15 +43,7 @@ const Trades = () => {
           </Tr>
         </Thead>
         <Tbody>
-          {_numberOfOrders.map((o, i) => (
-            <Tr key={o}>
-              <Td>{new Date('2/23/2021, 7:27:11 PM').toLocaleString()}</Td>
-              <Td isNumeric>2.8</Td>
-              <Td color={i % 3 === 0 ? 'red' : 'green'} isNumeric>
-                25.4
-              </Td>
-            </Tr>
-          ))}
+          {filledOrdersLoaded ? <FilledOrderTableRows filledOrders={filledOrders} /> : <LoadingTableRows />}
         </Tbody>
       </Table>
     </>

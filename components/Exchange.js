@@ -29,7 +29,7 @@ const Exchange = () => {
   return (
     <GridItem>
       <Grid
-        h="100%"
+        style={{ height: 'calc(100vh - 68px)' }}
         p="4"
         templateRows={gridTemplateRows}
         templateColumns={gridTemplateColumns}
@@ -67,6 +67,7 @@ const Exchange = () => {
         </GridItem>
 
         <GridItem
+          overflow={mediumScreenAndUp ? 'scroll' : 'initial'}
           colSpan={1}
           colStart={mediumScreenAndUp && 3}
           rowSpan={mediumScreenAndUp && 1}

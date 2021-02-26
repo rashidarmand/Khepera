@@ -1,10 +1,74 @@
-import { Heading, Tab, Table, TabList, TabPanel, TabPanels, Tabs, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
-import { useState } from 'react';
+import {
+  Heading,
+  Spinner,
+  Tab,
+  Table,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr
+} from '@chakra-ui/react';
+import {
+  currentUserFilledOrdersLoadedSelector,
+  currentUserFilledOrdersSelector,
+  currentUserOpenOrdersLoadedSelector,
+  currentUserOpenOrdersSelector
+} from '@store/selectors';
+import { useSelector } from 'react-redux';
+
+const CurrentUserFilledOrders = ({ filledOrders }) => {
+  return (
+    <>
+      {filledOrders.map((order) => (
+        <Tr key={order.id}>
+          <Td>{order.formattedTimestamp}</Td>
+          <Td color={order.orderTypeColor} isNumeric>
+            {order.orderSign}
+            {order.tokenAmount}
+          </Td>
+          <Td color={order.orderTypeColor} isNumeric>
+            {order.tokenPrice}
+          </Td>
+        </Tr>
+      ))}
+    </>
+  );
+};
+
+const CurrentUserOpenOrders = ({ openOrders }) => {
+  return (
+    <>
+      {openOrders.map((order) => (
+        <Tr key={order.id}>
+          <Td color={order.orderTypeColor}>{order.tokenAmount}</Td>
+          <Td color={order.orderTypeColor} isNumeric>
+            {order.tokenPrice}
+          </Td>
+          <Td textAlign="center">X</Td>
+        </Tr>
+      ))}
+    </>
+  );
+};
+// TODO: make loadingTableRows it's own component
+const LoadingTableRows = () => (
+  <Tr>
+    <Td colSpan="3" pt="6" textAlign="center">
+      <Spinner size="xl" />
+    </Td>
+  </Tr>
+);
 
 const MyTransactions = () => {
-  const options = ['Trades', 'Orders'];
-  const [tabIndex, setTabIndex] = useState(0);
-  const selectedOption = options[tabIndex];
+  const showCurrentUserFilledOrders = useSelector(currentUserFilledOrdersLoadedSelector);
+  const currentUserFilledOrders = useSelector(currentUserFilledOrdersSelector);
+  const showCurrentUserOpenOrders = useSelector(currentUserOpenOrdersLoadedSelector);
+  const currentUserOpenOrders = useSelector(currentUserOpenOrdersSelector);
 
   return (
     <>
@@ -12,7 +76,7 @@ const MyTransactions = () => {
         My Transactions
       </Heading>
 
-      <Tabs onChange={(index) => setTabIndex(index)} my="4" variant="soft-rounded" colorScheme="purple">
+      <Tabs my="4" variant="soft-rounded" colorScheme="purple">
         <TabList>
           <Tab>Trades</Tab>
           <Tab>Orders</Tab>
@@ -29,11 +93,11 @@ const MyTransactions = () => {
                 </Tr>
               </Thead>
               <Tbody>
-                <Tr>
-                  <Td>{new Date('2/23/2021, 7:27:11 PM').toLocaleString()}</Td>
-                  <Td isNumeric>2.8</Td>
-                  <Td isNumeric>25.4</Td>
-                </Tr>
+                {showCurrentUserFilledOrders ? (
+                  <CurrentUserFilledOrders filledOrders={currentUserFilledOrders} />
+                ) : (
+                  <LoadingTableRows />
+                )}
               </Tbody>
             </Table>
           </TabPanel>
@@ -43,15 +107,15 @@ const MyTransactions = () => {
                 <Tr>
                   <Th>Amount</Th>
                   <Th isNumeric>KHEP/ETH</Th>
-                  <Th isNumeric>Cancel</Th>
+                  <Th textAlign="center">Cancel</Th>
                 </Tr>
               </Thead>
               <Tbody>
-                <Tr>
-                  <Td>{new Date('2/23/2021, 7:27:11 PM').toLocaleString()}</Td>
-                  <Td isNumeric>2.8</Td>
-                  <Td isNumeric>25.4</Td>
-                </Tr>
+                {showCurrentUserOpenOrders ? (
+                  <CurrentUserOpenOrders openOrders={currentUserOpenOrders} />
+                ) : (
+                  <LoadingTableRows />
+                )}
               </Tbody>
             </Table>
           </TabPanel>

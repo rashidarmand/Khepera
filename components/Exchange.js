@@ -5,7 +5,7 @@ import NewOrder from '@components/NewOrder';
 import OrderBook from '@components/OrderBook';
 import PriceChart from '@components/PriceChart';
 import Trades from '@components/Trades';
-import { loadAllOrders } from '@store/effects';
+import { loadAllOrders, subscribeToEvents } from '@store/effects';
 import { exchangeSelector } from '@store/selectors';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -24,6 +24,7 @@ const Exchange = () => {
 
   useEffect(async () => {
     await loadBlockchainData(dispatch);
+    await subscribeToEvents(exchange, dispatch);
   }, []);
 
   return (

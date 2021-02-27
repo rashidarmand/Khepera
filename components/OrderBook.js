@@ -15,7 +15,7 @@ const OrderBookTableRows = ({ orderBook }) => {
 
   return (
     <>
-      {sell.map(renderOrderRow)}
+      {sell?.map(renderOrderRow)}
       <Tr>
         <Td fontWeight="bold">KHEP</Td>
         <Td fontWeight="bold">KHEP/ETH</Td>
@@ -23,7 +23,7 @@ const OrderBookTableRows = ({ orderBook }) => {
           ETH
         </Td>
       </Tr>
-      {buy.map(renderOrderRow)}
+      {buy?.map(renderOrderRow)}
     </>
   );
 };

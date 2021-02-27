@@ -19,3 +19,11 @@ export const allOrdersLoaded = (allOrders) => ({
   type: types.ALL_ORDERS_LOADED,
   payload: allOrders
 });
+// Cancel Order
+export const cancellingOrder = () => ({
+  type: types.CANCELLING_ORDER
+});
+export const orderCancelled = (order) => ({
+  type: types.ORDER_CANCELLED,
+  payload: order
+});

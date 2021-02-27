@@ -32,6 +32,17 @@ const exchange = (state = {}, { type, payload }) => {
       return { ...state, filledOrders: { loaded: true, data: payload } };
     case types.ALL_ORDERS_LOADED:
       return { ...state, allOrders: { loaded: true, data: payload } };
+    case types.CANCELLING_ORDER:
+      return { ...state, cancellingOrder: true };
+    case types.ORDER_CANCELLED:
+      return {
+        ...state,
+        cancellingOrder: false,
+        cancelledOrders: {
+          ...state.cancelledOrders,
+          data: [...state.cancelledOrders.data, payload]
+        }
+      };
     default:
       return state;
   }

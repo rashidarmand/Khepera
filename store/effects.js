@@ -5,8 +5,10 @@ import Web3 from 'web3';
 import {
   allOrdersLoaded,
   cancelledOrdersLoaded,
+  cancellingOrder,
   exchangeLoaded,
   filledOrdersLoaded,
+  orderCancelled,
   tokenLoaded,
   web3AccountLoaded,
   web3Loaded
@@ -74,4 +76,26 @@ export const loadAllOrders = async (exchange, dispatch) => {
   const orderStream = await exchange.getPastEvents('Order', { fromBlock: 0, toBlock: 'latest' });
   const allOrders = orderStream.map((event) => event.returnValues);
   dispatch(allOrdersLoaded(allOrders));
+};
+
+export const cancelOrder = (exchange, order, account, dispatch) => {
+  exchange.methods
+    .cancelOrder(order.id)
+    .send({ from: account })
+    .on('transactionHash', () => {
+      dispatch(cancellingOrder());
+    })
+    .on('error', (error) => {
+      console.error('Cancel Order Failure:: ', error);
+      alert('there was an error!');
+    });
+};
+
+export const subscribeToEvents = async (exchange, dispatch) => {
+  exchange.events
+    .Cancel()
+    .on('data', (event) => {
+      dispatch(orderCancelled(event.returnValues));
+    })
+    .on('error', console.error);
 };

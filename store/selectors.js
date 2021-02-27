@@ -27,7 +27,7 @@ export const allOrdersSelector = (state) => get(state, 'exchange.allOrders.data'
 // Order Book
 const openOrders = (state) => {
   const all = allOrdersSelector(state);
-  const filled = filledOrdersSelector(state);
+  const filled = filledOrders(state);
   const cancelled = cancelledOrdersSelector(state);
 
   const open = reject(all, (order) => {
@@ -83,3 +83,5 @@ export const priceChartSelector = createSelector(filledOrders, (orders) => {
     ]
   };
 });
+// Order cancelling
+export const cancellingOrderSelector = (state) => get(state, 'exchange.cancellingOrder', false);

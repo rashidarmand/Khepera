@@ -1,4 +1,5 @@
 import {
+  Button,
   Heading,
   Spinner,
   Tab,
@@ -13,13 +14,17 @@ import {
   Thead,
   Tr
 } from '@chakra-ui/react';
+import { cancelOrder } from '@store/effects';
 import {
+  accountSelector,
+  cancellingOrderSelector,
   currentUserFilledOrdersLoadedSelector,
   currentUserFilledOrdersSelector,
   currentUserOpenOrdersLoadedSelector,
-  currentUserOpenOrdersSelector
+  currentUserOpenOrdersSelector,
+  exchangeSelector
 } from '@store/selectors';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 const CurrentUserFilledOrders = ({ filledOrders }) => {
   return (
@@ -41,6 +46,10 @@ const CurrentUserFilledOrders = ({ filledOrders }) => {
 };
 
 const CurrentUserOpenOrders = ({ openOrders }) => {
+  const dispatch = useDispatch();
+  const exchange = useSelector(exchangeSelector);
+  const account = useSelector(accountSelector);
+
   return (
     <>
       {openOrders.map((order) => (
@@ -49,7 +58,16 @@ const CurrentUserOpenOrders = ({ openOrders }) => {
           <Td color={order.orderTypeColor} isNumeric>
             {order.tokenPrice}
           </Td>
-          <Td textAlign="center">X</Td>
+          <Td textAlign="center">
+            <Button
+              onClick={() => cancelOrder(exchange, order, account, dispatch)}
+              colorScheme="purple"
+              variant="ghost"
+              size="xs"
+            >
+              X
+            </Button>
+          </Td>
         </Tr>
       ))}
     </>
@@ -65,9 +83,10 @@ const LoadingTableRows = () => (
 );
 
 const MyTransactions = () => {
+  const cancellingOrder = useSelector(cancellingOrderSelector);
   const showCurrentUserFilledOrders = useSelector(currentUserFilledOrdersLoadedSelector);
   const currentUserFilledOrders = useSelector(currentUserFilledOrdersSelector);
-  const showCurrentUserOpenOrders = useSelector(currentUserOpenOrdersLoadedSelector);
+  const showCurrentUserOpenOrders = useSelector(currentUserOpenOrdersLoadedSelector) && !cancellingOrder;
   const currentUserOpenOrders = useSelector(currentUserOpenOrdersSelector);
 
   return (

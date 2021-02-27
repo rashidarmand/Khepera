@@ -37,11 +37,19 @@ const Exchange = () => {
         gap={4}
         color="gray.700"
       >
-        <GridItem colSpan={mediumScreenAndUp && 1} colStart={mediumScreenAndUp && 1} bg="pink.50" shadow="lg" p="2">
+        <GridItem
+          borderRadius="xl"
+          colSpan={mediumScreenAndUp && 1}
+          colStart={mediumScreenAndUp && 1}
+          bg="pink.50"
+          shadow="lg"
+          p="2"
+        >
           <Balance />
         </GridItem>
 
         <GridItem
+          borderRadius="xl"
           colSpan={mediumScreenAndUp && 1}
           rowStart={mediumScreenAndUp && 2}
           colStart={mediumScreenAndUp && 1}
@@ -52,11 +60,12 @@ const Exchange = () => {
           <NewOrder />
         </GridItem>
 
-        <GridItem colSpan={1} rowSpan={mediumScreenAndUp && 2} bg="pink.50" shadow="lg" p="2">
+        <GridItem borderRadius="xl" colSpan={1} rowSpan={mediumScreenAndUp && 2} bg="pink.50" shadow="lg" p="2">
           <OrderBook />
         </GridItem>
 
         <GridItem
+          borderRadius="xl"
           colSpan={mediumScreenAndUp && 1}
           colStart={mediumScreenAndUp && 3}
           rowSpan={mediumScreenAndUp && 1}
@@ -68,6 +77,7 @@ const Exchange = () => {
         </GridItem>
 
         <GridItem
+          borderRadius="xl"
           overflow={mediumScreenAndUp ? 'scroll' : 'initial'}
           colSpan={1}
           colStart={mediumScreenAndUp && 3}
@@ -81,6 +91,7 @@ const Exchange = () => {
         </GridItem>
 
         <GridItem
+          borderRadius="xl"
           colSpan={1}
           colStart={mediumScreenAndUp && 4}
           rowSpan={mediumScreenAndUp && 2}

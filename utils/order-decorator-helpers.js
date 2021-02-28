@@ -69,7 +69,7 @@ const decorateOrderBookOrder = (order) => {
     ...order,
     orderType,
     orderTypeColor: orderType === 'buy' ? TOKEN_PRICE_COLORS.GREEN : TOKEN_PRICE_COLORS.RED,
-    orderFillClass: orderType === 'buy' ? 'sell' : 'buy'
+    orderFillAction: orderType === 'buy' ? 'sell' : 'buy'
   };
 };
 

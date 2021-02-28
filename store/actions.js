@@ -27,3 +27,11 @@ export const orderCancelled = (order) => ({
   type: types.ORDER_CANCELLED,
   payload: order
 });
+// Fill Order
+export const fillingOrder = () => ({
+  type: types.FILLING_ORDER
+});
+export const orderFilled = (order) => ({
+  type: types.ORDER_FILLED,
+  payload: order
+});

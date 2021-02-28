@@ -85,3 +85,5 @@ export const priceChartSelector = createSelector(filledOrders, (orders) => {
 });
 // Order cancelling
 export const cancellingOrderSelector = (state) => get(state, 'exchange.cancellingOrder', false);
+// Order filling
+export const fillingOrderSelector = (state) => get(state, 'exchange.fillingOrder', false);

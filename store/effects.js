@@ -8,7 +8,9 @@ import {
   cancellingOrder,
   exchangeLoaded,
   filledOrdersLoaded,
+  fillingOrder,
   orderCancelled,
+  orderFilled,
   tokenLoaded,
   web3AccountLoaded,
   web3Loaded
@@ -78,6 +80,21 @@ export const loadAllOrders = async (exchange, dispatch) => {
   dispatch(allOrdersLoaded(allOrders));
 };
 
+export const subscribeToEvents = async (exchange, dispatch) => {
+  const { Cancel, Trade } = exchange.events;
+  Cancel()
+    .on('data', (event) => {
+      dispatch(orderCancelled(event.returnValues));
+    })
+    .on('error', console.error);
+
+  Trade()
+    .on('data', (event) => {
+      dispatch(orderFilled(event.returnValues));
+    })
+    .on('error', console.error);
+};
+
 export const cancelOrder = (exchange, order, account, dispatch) => {
   exchange.methods
     .cancelOrder(order.id)
@@ -91,11 +108,15 @@ export const cancelOrder = (exchange, order, account, dispatch) => {
     });
 };
 
-export const subscribeToEvents = async (exchange, dispatch) => {
-  exchange.events
-    .Cancel()
-    .on('data', (event) => {
-      dispatch(orderCancelled(event.returnValues));
+export const fillOrder = (exchange, order, account, dispatch) => {
+  exchange.methods
+    .fillOrder(order.id)
+    .send({ from: account })
+    .on('transactionHash', () => {
+      dispatch(fillingOrder());
     })
-    .on('error', console.error);
+    .on('error', (error) => {
+      console.error('Fill Order Failure:: ', error);
+      alert('there was an error!');
+    });
 };

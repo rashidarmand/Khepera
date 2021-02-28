@@ -43,6 +43,17 @@ const exchange = (state = {}, { type, payload }) => {
           data: [...state.cancelledOrders.data, payload]
         }
       };
+    case types.FILLING_ORDER:
+      return { ...state, fillingOrder: true };
+    case types.ORDER_FILLED:
+      return {
+        ...state,
+        fillingOrder: false,
+        filledOrders: {
+          ...state.filledOrders,
+          data: [...state.filledOrders.data, payload]
+        }
+      };
     default:
       return state;
   }

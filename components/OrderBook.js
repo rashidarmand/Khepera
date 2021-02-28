@@ -1,17 +1,36 @@
-import { Box, Flex, Heading, Spinner, Table, Tbody, Td, Tr } from '@chakra-ui/react';
-import { orderBookLoadedSelector, orderBookSelector } from '@store/selectors';
-import { useSelector } from 'react-redux';
+import { Box, Flex, Heading, Spinner, Table, Tbody, Td, Tooltip, Tr } from '@chakra-ui/react';
+import { fillOrder } from '@store/effects';
+import {
+  accountSelector,
+  exchangeSelector,
+  fillingOrderSelector,
+  orderBookLoadedSelector,
+  orderBookSelector
+} from '@store/selectors';
+import { useDispatch, useSelector } from 'react-redux';
 
 const OrderBookTableRows = ({ orderBook }) => {
   const { buy, sell } = orderBook;
+  const dispatch = useDispatch();
+  const exchange = useSelector(exchangeSelector);
+  const account = useSelector(accountSelector);
 
-  const renderOrderRow = (order) => (
-    <Tr key={order.id}>
-      <Td>{order.tokenAmount}</Td>
-      <Td color={order.orderTypeColor}>{order.tokenPrice}</Td>
-      <Td isNumeric>{order.etherAmount}</Td>
-    </Tr>
-  );
+  const renderOrderRow = (order) => {
+    const orderFillMessage = `Click here to ${order.orderFillAction}`;
+    return (
+      <Tr key={order.id}>
+        <Td>{order.tokenAmount}</Td>
+        <Td color={order.orderTypeColor}>
+          <Tooltip label={orderFillMessage} aria-label={orderFillMessage} hasArrow>
+            <Box as="span" cursor="pointer" onClick={() => fillOrder(exchange, order, account, dispatch)}>
+              {order.tokenPrice}
+            </Box>
+          </Tooltip>
+        </Td>
+        <Td isNumeric>{order.etherAmount}</Td>
+      </Tr>
+    );
+  };
 
   return (
     <>
@@ -38,7 +57,8 @@ const LoadingTableRows = () => (
 
 const OrderBook = () => {
   const orderBook = useSelector(orderBookSelector);
-  const showOrderBook = useSelector(orderBookLoadedSelector);
+  const fillingOrder = useSelector(fillingOrderSelector);
+  const showOrderBook = useSelector(orderBookLoadedSelector) && !fillingOrder;
 
   return (
     <Flex h="100%" direction="column">

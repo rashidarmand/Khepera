@@ -45,8 +45,12 @@ export const orderBookLoadedSelector = (state) =>
   cancelledOrdersLoadedSelector(state) && filledOrdersLoadedSelector(state) && allOrdersLoadedSelector(state);
 // Create the order book
 export const orderBookSelector = createSelector(openOrders, (orders) => {
-  const decoratedOrders = decorateOrders(orders, ORDER_DECORATION_TYPE.ORDER_BOOK);
-  return groupBy(decoratedOrders, 'orderType');
+  orders = decorateOrders(orders, ORDER_DECORATION_TYPE.ORDER_BOOK);
+  orders = groupBy(orders, 'orderType');
+  // sort by token price
+  orders?.buy?.sort((a, b) => b.tokenPrice - a.tokenPrice);
+  orders?.sell?.sort((a, b) => b.tokenPrice - a.tokenPrice);
+  return orders;
 });
 // Current User Filled Orders (My Transactions)
 export const currentUserFilledOrdersLoadedSelector = filledOrdersLoadedSelector;
@@ -108,3 +112,7 @@ export const tokenDepositAmountSelector = (state) => get(state, 'exchange.tokenD
 // Withdrawals
 export const etherWithdrawAmountSelector = (state) => get(state, 'exchange.etherWithdrawAmount', null);
 export const tokenWithdrawAmountSelector = (state) => get(state, 'exchange.tokenWithdrawAmount', null);
+// Buy Orders
+export const buyOrderSelector = (state) => get(state, 'exchange.buyOrder', {});
+// Sell Orders
+export const sellOrderSelector = (state) => get(state, 'exchange.sellOrder', {});

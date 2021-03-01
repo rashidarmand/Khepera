@@ -92,24 +92,24 @@ export const loadAllOrders = async (exchange, dispatch) => {
 
 export const subscribeToEvents = (web3, exchange, token, account, dispatch) => {
   const { Cancel, Trade, Deposit, Withdraw, Order } = exchange.events;
-  Cancel()
-    .on('data', (event) => {
-      dispatch(orderCancelled(event.returnValues));
-    })
-    .on('error', console.error);
+  Cancel().on('data', (event) => {
+    dispatch(orderCancelled(event.returnValues));
+  });
 
-  Trade()
-    .on('data', (event) => {
-      dispatch(orderFilled(event.returnValues));
-    })
-    .on('error', console.error);
+  Trade().on('data', async (event) => {
+    dispatch(loadingBalances());
+    dispatch(orderFilled(event.returnValues));
+    await loadBalances(web3, exchange, token, account, dispatch);
+  });
 
   Deposit().on('data', async () => {
     await loadBalances(web3, exchange, token, account, dispatch);
   });
+
   Withdraw().on('data', async () => {
     await loadBalances(web3, exchange, token, account, dispatch);
   });
+
   Order().on('data', (event) => dispatch(orderCreated(event.returnValues)));
 };
 

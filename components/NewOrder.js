@@ -14,6 +14,7 @@ import {
   Tabs,
   Tbody,
   Td,
+  Text,
   Tr
 } from '@chakra-ui/react';
 import {
@@ -90,13 +91,21 @@ const OrderForm = ({
         {showTotal && (
           <Tr>
             <Td colSpan="3" px="0">
-              Total: {order.amount * order.price} ETH
+              <Text as="em" fontWeight="bold">
+                {formatOrderTotal(order)}
+              </Text>
             </Td>
           </Tr>
         )}
       </Tbody>
     </Table>
   );
+};
+
+const formatOrderTotal = (order) => {
+  const result = order.amount * order.price;
+  if (isNaN(result)) return 'Invalid Order';
+  return `Total: ${result} ETH`;
 };
 
 const Loading = () => (

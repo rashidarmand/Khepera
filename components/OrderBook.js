@@ -17,18 +17,25 @@ const OrderBookTableRows = ({ orderBook }) => {
 
   const renderOrderRow = (order) => {
     const orderFillMessage = `Click here to ${order.orderFillAction}`;
+    const orderBelongsToUser = order.user === account;
     return (
       <Tr key={order.id}>
         <Td>{order.tokenAmount}</Td>
-        <Td color={order.orderTypeColor}>
-          <Tooltip label={orderFillMessage} aria-label={orderFillMessage} hasArrow>
-            <Box as="span" cursor="pointer" onClick={() => fillOrder(exchange, order, account, dispatch)}>
-              {order.tokenPrice}
-            </Box>
-          </Tooltip>
-        </Td>
+        <Td color={order.orderTypeColor}>{renderOrderFill(orderBelongsToUser, orderFillMessage, order)}</Td>
         <Td isNumeric>{order.etherAmount}</Td>
       </Tr>
+    );
+  };
+
+  const renderOrderFill = (orderBelongsToUser, orderFillMessage, order) => {
+    return orderBelongsToUser ? (
+      <Box as="span">{order.tokenPrice}</Box>
+    ) : (
+      <Tooltip label={orderFillMessage} aria-label={orderFillMessage} hasArrow>
+        <Box as="span" cursor="pointer" onClick={() => fillOrder(exchange, order, account, dispatch)}>
+          {order.tokenPrice}
+        </Box>
+      </Tooltip>
     );
   };
 

@@ -8,6 +8,8 @@ import {
   balancesLoaded,
   cancelledOrdersLoaded,
   cancellingOrder,
+  creatingBuyOrder,
+  creatingSellOrder,
   etherBalanceLoaded,
   exchangeEtherBalanceLoaded,
   exchangeLoaded,
@@ -16,6 +18,7 @@ import {
   fillingOrder,
   loadingBalances,
   orderCancelled,
+  orderCreated,
   orderFilled,
   tokenBalanceLoaded,
   tokenLoaded,
@@ -88,7 +91,7 @@ export const loadAllOrders = async (exchange, dispatch) => {
 };
 
 export const subscribeToEvents = async (exchange, dispatch) => {
-  const { Cancel, Trade, Deposit, Withdraw } = exchange.events;
+  const { Cancel, Trade, Deposit, Withdraw, Order } = exchange.events;
   Cancel()
     .on('data', (event) => {
       dispatch(orderCancelled(event.returnValues));
@@ -103,6 +106,7 @@ export const subscribeToEvents = async (exchange, dispatch) => {
 
   Deposit().on('data', () => dispatch(balancesLoaded()));
   Withdraw().on('data', () => dispatch(balancesLoaded()));
+  Order().on('data', (event) => dispatch(orderCreated(event.returnValues)));
 };
 
 export const cancelOrder = (exchange, order, account, dispatch) => {
@@ -210,6 +214,42 @@ export const withdrawToken = (amount, exchange, token, web3, account, dispatch) 
     .send({ from: account })
     .on('transactionHash', () => {
       dispatch(loadingBalances());
+    })
+    .on('error', (error) => {
+      console.error(error);
+      alert('There was an error!');
+    });
+};
+
+export const createBuyOrder = (exchange, token, web3, order, account, dispatch) => {
+  const tokenGet = token.options.address;
+  const amountGet = web3.utils.toWei(order.amount, 'ether');
+  const tokenGive = ETHER_ADDRESS;
+  const amountGive = web3.utils.toWei((order.amount * order.price).toString(), 'ether');
+
+  exchange.methods
+    .makeOrder(tokenGet, amountGet, tokenGive, amountGive)
+    .send({ from: account })
+    .on('transactionHash', () => {
+      dispatch(creatingBuyOrder());
+    })
+    .on('error', (error) => {
+      console.error(error);
+      alert('There was an error!');
+    });
+};
+
+export const createSellOrder = (exchange, token, web3, order, account, dispatch) => {
+  const tokenGet = ETHER_ADDRESS;
+  const amountGet = web3.utils.toWei((order.amount * order.price).toString(), 'ether');
+  const tokenGive = token.options.address;
+  const amountGive = web3.utils.toWei(order.amount, 'ether');
+
+  exchange.methods
+    .makeOrder(tokenGet, amountGet, tokenGive, amountGive)
+    .send({ from: account })
+    .on('transactionHash', () => {
+      dispatch(creatingSellOrder());
     })
     .on('error', (error) => {
       console.error(error);

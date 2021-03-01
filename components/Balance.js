@@ -8,6 +8,8 @@ import {
   Tab,
   Table,
   TabList,
+  TabPanel,
+  TabPanels,
   Tabs,
   Tbody,
   Td,
@@ -40,7 +42,7 @@ import {
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-const TableRows = ({
+const TableWithForm = ({
   web3,
   token,
   account,
@@ -49,6 +51,7 @@ const TableRows = ({
   selectedTab,
   etherBalance,
   tokenBalance,
+  showTableRows,
   exchangeEtherBalance,
   exchangeTokenBalance,
   etherDepositAmount,
@@ -85,20 +88,35 @@ const TableRows = ({
     }
   };
   return (
-    <>
-      <Tr>
-        <Td>ETH</Td>
-        <Td isNumeric>{etherBalance}</Td>
-        <Td isNumeric>{exchangeEtherBalance}</Td>
-      </Tr>
-      <TrWithInput {...trWithInputProps} {...trWithInputPropsForEther} placeholder="ETH Amount" />
-      <Tr>
-        <Td>KHEP</Td>
-        <Td isNumeric>{tokenBalance}</Td>
-        <Td isNumeric>{exchangeTokenBalance}</Td>
-      </Tr>
-      <TrWithInput {...trWithInputProps} {...trWithInputPropsForToken} placeholder="KHEP Amount" />
-    </>
+    <Table size="sm">
+      <Thead>
+        <Tr>
+          <Th>Token</Th>
+          <Th isNumeric>Wallet</Th>
+          <Th isNumeric>Exchange</Th>
+        </Tr>
+      </Thead>
+      <Tbody>
+        {!showTableRows ? (
+          <LoadingTableRows />
+        ) : (
+          <>
+            <Tr>
+              <Td>ETH</Td>
+              <Td isNumeric>{etherBalance}</Td>
+              <Td isNumeric>{exchangeEtherBalance}</Td>
+            </Tr>
+            <TrWithInput {...trWithInputProps} {...trWithInputPropsForEther} placeholder="ETH Amount" />
+            <Tr>
+              <Td>KHEP</Td>
+              <Td isNumeric>{tokenBalance}</Td>
+              <Td isNumeric>{exchangeTokenBalance}</Td>
+            </Tr>
+            <TrWithInput {...trWithInputProps} {...trWithInputPropsForToken} placeholder="KHEP Amount" />
+          </>
+        )}
+      </Tbody>
+    </Table>
   );
 };
 
@@ -177,6 +195,7 @@ const Balance = () => {
     selectedTab,
     etherBalance,
     tokenBalance,
+    showTableRows,
     tokenDepositAmount,
     tokenWithdrawAmount,
     etherDepositAmount,
@@ -204,18 +223,15 @@ const Balance = () => {
           <Tab>Deposit</Tab>
           <Tab>Withdraw</Tab>
         </TabList>
+        <TabPanels>
+          <TabPanel>
+            <TableWithForm {...tableRowsProps} />
+          </TabPanel>
+          <TabPanel>
+            <TableWithForm {...tableRowsProps} />
+          </TabPanel>
+        </TabPanels>
       </Tabs>
-
-      <Table size="sm">
-        <Thead>
-          <Tr>
-            <Th>Token</Th>
-            <Th isNumeric>Wallet</Th>
-            <Th isNumeric>Exchange</Th>
-          </Tr>
-        </Thead>
-        <Tbody>{showTableRows ? <TableRows {...tableRowsProps} /> : <LoadingTableRows />}</Tbody>
-      </Table>
     </>
   );
 };

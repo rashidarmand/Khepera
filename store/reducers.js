@@ -74,6 +74,25 @@ const exchange = (state = {}, { type, payload }) => {
       return { ...state, tokenDepositAmount: payload };
     case types.TOKEN_WITHDRAW_AMOUNT_CHANGED:
       return { ...state, tokenWithdrawAmount: payload };
+    case types.BUY_ORDER_AMOUNT_CHANGED:
+      return { ...state, buyOrder: { ...state.buyOrder, amount: payload } };
+    case types.BUY_ORDER_PRICE_CHANGED:
+      return { ...state, buyOrder: { ...state.buyOrder, price: payload } };
+    case types.CREATING_BUY_ORDER:
+      return { ...state, buyOrder: { ...state.buyOrder, price: null, amount: null, creating: true } };
+    case types.SELL_ORDER_AMOUNT_CHANGED:
+      return { ...state, sellOrder: { ...state.sellOrder, amount: payload } };
+    case types.SELL_ORDER_PRICE_CHANGED:
+      return { ...state, sellOrder: { ...state.sellOrder, price: payload } };
+    case types.CREATING_SELL_ORDER:
+      return { ...state, sellOrder: { ...state.sellOrder, price: null, amount: null, creating: true } };
+    case types.ORDER_CREATED:
+      return {
+        ...state,
+        allOrders: { ...state.allOrders, data: [...state.allOrders.data, payload] },
+        buyOrder: { ...state.buyOrder, creating: false },
+        sellOrder: { ...state.sellOrder, creating: false }
+      };
     default:
       return state;
   }

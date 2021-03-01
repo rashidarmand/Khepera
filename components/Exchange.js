@@ -14,6 +14,10 @@ const Exchange = () => {
   const mediumScreenAndUp = useBreakpointValue({ md: true, base: false });
   const gridTemplateColumns = useBreakpointValue({ md: '1fr 1fr 2fr 1fr', base: '1fr' });
   const gridTemplateRows = useBreakpointValue({ md: 'repeat(2, 1fr)', base: 'repeat(6, 1fr)' });
+  const gridHeight = useBreakpointValue({
+    md: { height: 'calc(100vh - 68px)' },
+    base: { height: 'calc(100vh - 68px - 16px)' }
+  });
 
   const dispatch = useDispatch();
   const exchange = useSelector(exchangeSelector);
@@ -33,7 +37,8 @@ const Exchange = () => {
   return (
     <GridItem>
       <Grid
-        style={{ height: 'calc(100vh - 68px)' }}
+        style={gridHeight}
+        overflow="scroll"
         p="4"
         templateRows={gridTemplateRows}
         templateColumns={gridTemplateColumns}
@@ -63,7 +68,15 @@ const Exchange = () => {
           <NewOrder />
         </GridItem>
 
-        <GridItem borderRadius="xl" colSpan={1} rowSpan={mediumScreenAndUp && 2} bg="pink.50" shadow="lg" p="2">
+        <GridItem
+          borderRadius="xl"
+          overflow={mediumScreenAndUp ? 'scroll' : 'initial'}
+          colSpan={1}
+          rowSpan={mediumScreenAndUp && 2}
+          bg="pink.50"
+          shadow="lg"
+          p="2"
+        >
           <OrderBook />
         </GridItem>
 
@@ -95,6 +108,7 @@ const Exchange = () => {
 
         <GridItem
           borderRadius="xl"
+          overflow={mediumScreenAndUp ? 'scroll' : 'initial'}
           colSpan={1}
           colStart={mediumScreenAndUp && 4}
           rowSpan={mediumScreenAndUp && 2}

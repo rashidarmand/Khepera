@@ -1,8 +1,8 @@
 import * as types from './types';
 
 // WEB 3
-export const web3Loaded = (connection) => ({ type: types.WEB3.LOADED, payload: connection });
-export const web3AccountLoaded = (account) => ({ type: types.WEB3.ACCOUNT_LOADED, payload: account });
+export const web3Loaded = (connection) => ({ type: types.WEB3_LOADED, payload: connection });
+export const web3AccountLoaded = (account) => ({ type: types.WEB3_ACCOUNT_LOADED, payload: account });
 // TOKEN
 export const tokenLoaded = (contract) => ({ type: types.TOKEN_LOADED, payload: contract });
 // EXCHANGE
@@ -34,4 +34,45 @@ export const fillingOrder = () => ({
 export const orderFilled = (order) => ({
   type: types.ORDER_FILLED,
   payload: order
+});
+// Loading Balances
+export const etherBalanceLoaded = (balance) => ({
+  type: types.ETHER_BALANCE_LOADED,
+  payload: balance
+});
+export const tokenBalanceLoaded = (balance) => ({
+  type: types.TOKEN_BALANCE_LOADED,
+  payload: balance
+});
+export const exchangeEtherBalanceLoaded = (balance) => ({
+  type: types.EXCHANGE_ETHER_BALANCE_LOADED,
+  payload: balance
+});
+export const exchangeTokenBalanceLoaded = (balance) => ({
+  type: types.EXCHANGE_TOKEN_BALANCE_LOADED,
+  payload: balance
+});
+export const balancesLoaded = () => ({
+  type: types.BALANCES_LOADED
+});
+export const loadingBalances = () => ({
+  type: types.LOADING_BALANCES
+});
+// Deposits
+export const etherDepositAmountChanged = (amount) => ({
+  type: types.ETHER_DEPOSIT_AMOUNT_CHANGED,
+  payload: amount
+});
+export const tokenDepositAmountChanged = (amount) => ({
+  type: types.TOKEN_DEPOSIT_AMOUNT_CHANGED,
+  payload: amount
+});
+// Withdrawals
+export const etherWithdrawAmountChanged = (amount) => ({
+  type: types.ETHER_WITHDRAW_AMOUNT_CHANGED,
+  payload: amount
+});
+export const tokenWithdrawAmountChanged = (amount) => ({
+  type: types.TOKEN_WITHDRAW_AMOUNT_CHANGED,
+  payload: amount
 });

@@ -159,3 +159,9 @@ export const buildGraphData = (orders) => {
   });
   return graphData;
 };
+
+export const formatBalance = (unformattedBalance) => {
+  const precision = 100; // 2 decimal places
+  const balance = ether(unformattedBalance);
+  return Math.round(balance * precision) / precision;
+};

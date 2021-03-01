@@ -3,6 +3,7 @@ import {
   Heading,
   NumberInput,
   NumberInputField,
+  Spinner,
   Stack,
   Tab,
   Table,
@@ -14,12 +15,183 @@ import {
   Thead,
   Tr
 } from '@chakra-ui/react';
-import { useState } from 'react';
+import {
+  etherDepositAmountChanged,
+  etherWithdrawAmountChanged,
+  tokenDepositAmountChanged,
+  tokenWithdrawAmountChanged
+} from '@store/actions';
+import { depositEther, depositToken, loadBalances, withdrawEther, withdrawToken } from '@store/effects';
+import {
+  accountSelector,
+  etherBalanceSelector,
+  etherDepositAmountSelector,
+  etherWithdrawAmountSelector,
+  exchangeEtherBalanceSelector,
+  exchangeSelector,
+  exchangeTokenBalanceSelector,
+  loadingBalancesSelector,
+  tokenBalanceSelector,
+  tokenDepositAmountSelector,
+  tokenSelector,
+  tokenWithdrawAmountSelector,
+  web3Selector
+} from '@store/selectors';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+
+const TableRows = ({
+  web3,
+  token,
+  account,
+  exchange,
+  dispatch,
+  selectedTab,
+  etherBalance,
+  tokenBalance,
+  exchangeEtherBalance,
+  exchangeTokenBalance,
+  etherDepositAmount,
+  etherWithdrawAmount,
+  tokenDepositAmount,
+  tokenWithdrawAmount
+}) => {
+  const trWithInputProps = {
+    web3,
+    token,
+    account,
+    dispatch,
+    exchange,
+    onDepositTab: selectedTab === 'Deposit'
+  };
+  const trWithInputPropsForEther = {
+    depositMethods: {
+      handleOnChange: (amount) => dispatch(etherDepositAmountChanged(amount)),
+      handleOnClick: () => depositEther(etherDepositAmount, exchange, web3, account, dispatch)
+    },
+    withdrawMethods: {
+      handleOnChange: (amount) => dispatch(etherWithdrawAmountChanged(amount)),
+      handleOnClick: () => withdrawEther(etherWithdrawAmount, exchange, web3, account, dispatch)
+    }
+  };
+  const trWithInputPropsForToken = {
+    depositMethods: {
+      handleOnChange: (amount) => dispatch(tokenDepositAmountChanged(amount)),
+      handleOnClick: () => depositToken(tokenDepositAmount, exchange, token, web3, account, dispatch)
+    },
+    withdrawMethods: {
+      handleOnChange: (amount) => dispatch(tokenWithdrawAmountChanged(amount)),
+      handleOnClick: () => withdrawToken(tokenWithdrawAmount, exchange, token, web3, account, dispatch)
+    }
+  };
+  return (
+    <>
+      <Tr>
+        <Td>ETH</Td>
+        <Td isNumeric>{etherBalance}</Td>
+        <Td isNumeric>{exchangeEtherBalance}</Td>
+      </Tr>
+      <TrWithInput {...trWithInputProps} {...trWithInputPropsForEther} placeholder="ETH Amount" />
+      <Tr>
+        <Td>KHEP</Td>
+        <Td isNumeric>{tokenBalance}</Td>
+        <Td isNumeric>{exchangeTokenBalance}</Td>
+      </Tr>
+      <TrWithInput {...trWithInputProps} {...trWithInputPropsForToken} placeholder="KHEP Amount" />
+    </>
+  );
+};
+
+const TrWithInput = ({ placeholder, onDepositTab, depositMethods, withdrawMethods }) => {
+  const showDeposit = () => (
+    <>
+      <NumberInput min={0} max={1000} onChange={depositMethods.handleOnChange}>
+        <NumberInputField placeholder={placeholder} />
+      </NumberInput>
+
+      <Button colorScheme="purple" variant="outline" size="sm" onClick={depositMethods.handleOnClick}>
+        Deposit
+      </Button>
+    </>
+  );
+
+  const showWithdraw = () => (
+    <>
+      <NumberInput min={0} max={1000} onChange={withdrawMethods.handleOnChange}>
+        <NumberInputField placeholder={placeholder} />
+      </NumberInput>
+
+      <Button colorScheme="purple" variant="outline" size="sm" onClick={withdrawMethods.handleOnClick}>
+        Withdraw
+      </Button>
+    </>
+  );
+
+  return (
+    <>
+      <Tr>
+        <Td colSpan="3" px="0">
+          <Stack spacing={4} direction="row" align="center" justify="center">
+            {onDepositTab ? showDeposit() : showWithdraw()}
+          </Stack>
+        </Td>
+      </Tr>
+    </>
+  );
+};
+
+// TODO: make loadingTableRows it's own component
+const LoadingTableRows = () => (
+  <Tr>
+    <Td colSpan="3" pt="6" textAlign="center">
+      <Spinner size="xl" />
+    </Td>
+  </Tr>
+);
 
 const Balance = () => {
   const options = ['Deposit', 'Withdraw'];
   const [tabIndex, setTabIndex] = useState(0);
-  const selectedOption = options[tabIndex];
+  const selectedTab = options[tabIndex];
+  const dispatch = useDispatch();
+  const exchange = useSelector(exchangeSelector);
+  const account = useSelector(accountSelector);
+  const web3 = useSelector(web3Selector);
+  const token = useSelector(tokenSelector);
+  const etherBalance = useSelector(etherBalanceSelector);
+  const tokenBalance = useSelector(tokenBalanceSelector);
+  const exchangeEtherBalance = useSelector(exchangeEtherBalanceSelector);
+  const exchangeTokenBalance = useSelector(exchangeTokenBalanceSelector);
+  const loadingBalances = useSelector(loadingBalancesSelector);
+  const etherDepositAmount = useSelector(etherDepositAmountSelector);
+  const etherWithdrawAmount = useSelector(etherWithdrawAmountSelector);
+  const tokenDepositAmount = useSelector(tokenDepositAmountSelector);
+  const tokenWithdrawAmount = useSelector(tokenWithdrawAmountSelector);
+  const showTableRows = !loadingBalances;
+  const tableRowsProps = {
+    web3,
+    token,
+    account,
+    exchange,
+    dispatch,
+    selectedTab,
+    etherBalance,
+    tokenBalance,
+    tokenDepositAmount,
+    tokenWithdrawAmount,
+    etherDepositAmount,
+    etherWithdrawAmount,
+    exchangeTokenBalance,
+    exchangeEtherBalance
+  };
+
+  const loadBlockchainData = async (dispatch) => {
+    await loadBalances(web3, exchange, token, account, dispatch);
+  };
+
+  useEffect(async () => {
+    await loadBlockchainData(dispatch);
+  }, []);
 
   return (
     <>
@@ -42,54 +214,7 @@ const Balance = () => {
             <Th isNumeric>Exchange</Th>
           </Tr>
         </Thead>
-        <Tbody>
-          <Tr>
-            <Td>ETH</Td>
-            <Td isNumeric>2.8</Td>
-            <Td isNumeric>25.4</Td>
-          </Tr>
-          <Tr>
-            <Td colSpan="3" px="0">
-              <Stack spacing={4} direction="row" align="center" justify="center">
-                <NumberInput min={0} max={20}>
-                  <NumberInputField placeholder="ETH Amount" />
-                </NumberInput>
-                {selectedOption === 'Deposit' ? (
-                  <Button colorScheme="purple" variant="outline" size="sm">
-                    Deposit
-                  </Button>
-                ) : (
-                  <Button colorScheme="purple" variant="outline" size="sm">
-                    Withdraw
-                  </Button>
-                )}
-              </Stack>
-            </Td>
-          </Tr>
-          <Tr>
-            <Td>KHEP</Td>
-            <Td isNumeric>0</Td>
-            <Td isNumeric>0</Td>
-          </Tr>
-          <Tr>
-            <Td colSpan="3" px="0">
-              <Stack spacing={4} direction="row" align="center" justify="center">
-                <NumberInput min={0} max={20}>
-                  <NumberInputField placeholder="KHEP Amount" />
-                </NumberInput>
-                {selectedOption === 'Deposit' ? (
-                  <Button colorScheme="purple" variant="outline" size="sm">
-                    Deposit
-                  </Button>
-                ) : (
-                  <Button colorScheme="purple" variant="outline" size="sm">
-                    Withdraw
-                  </Button>
-                )}
-              </Stack>
-            </Td>
-          </Tr>
-        </Tbody>
+        <Tbody>{showTableRows ? <TableRows {...tableRowsProps} /> : <LoadingTableRows />}</Tbody>
       </Table>
     </>
   );

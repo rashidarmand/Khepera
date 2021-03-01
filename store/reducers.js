@@ -4,10 +4,12 @@ import * as types from './types';
 
 const web3 = (state = {}, { type, payload }) => {
   switch (type) {
-    case types.WEB3.LOADED:
+    case types.WEB3_LOADED:
       return { ...state, connection: payload };
-    case types.WEB3.ACCOUNT_LOADED:
+    case types.WEB3_ACCOUNT_LOADED:
       return { ...state, account: payload };
+    case types.ETHER_BALANCE_LOADED:
+      return { ...state, balance: payload };
     default:
       return state;
   }
@@ -17,6 +19,8 @@ const token = (state = {}, { type, payload }) => {
   switch (type) {
     case types.TOKEN_LOADED:
       return { ...state, loaded: true, contract: payload };
+    case types.TOKEN_BALANCE_LOADED:
+      return { ...state, balance: payload };
     default:
       return state;
   }
@@ -54,6 +58,22 @@ const exchange = (state = {}, { type, payload }) => {
           data: [...state.filledOrders.data, payload]
         }
       };
+    case types.EXCHANGE_ETHER_BALANCE_LOADED:
+      return { ...state, etherBalance: payload };
+    case types.EXCHANGE_TOKEN_BALANCE_LOADED:
+      return { ...state, tokenBalance: payload };
+    case types.LOADING_BALANCES:
+      return { ...state, loadingBalances: true };
+    case types.BALANCES_LOADED:
+      return { ...state, loadingBalances: false };
+    case types.ETHER_DEPOSIT_AMOUNT_CHANGED:
+      return { ...state, etherDepositAmount: payload };
+    case types.ETHER_WITHDRAW_AMOUNT_CHANGED:
+      return { ...state, etherWithdrawAmount: payload };
+    case types.TOKEN_DEPOSIT_AMOUNT_CHANGED:
+      return { ...state, tokenDepositAmount: payload };
+    case types.TOKEN_WITHDRAW_AMOUNT_CHANGED:
+      return { ...state, tokenWithdrawAmount: payload };
     default:
       return state;
   }

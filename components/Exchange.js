@@ -6,7 +6,7 @@ import OrderBook from '@components/OrderBook';
 import PriceChart from '@components/PriceChart';
 import Trades from '@components/Trades';
 import { loadAllOrders, subscribeToEvents } from '@store/effects';
-import { exchangeSelector } from '@store/selectors';
+import { accountSelector, exchangeSelector, tokenSelector, web3Selector } from '@store/selectors';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -17,14 +17,17 @@ const Exchange = () => {
 
   const dispatch = useDispatch();
   const exchange = useSelector(exchangeSelector);
+  const account = useSelector(accountSelector);
+  const web3 = useSelector(web3Selector);
+  const token = useSelector(tokenSelector);
 
-  const loadBlockchainData = async (dispatch) => {
+  const loadBlockchainData = async () => {
     await loadAllOrders(exchange, dispatch);
   };
 
   useEffect(async () => {
-    await loadBlockchainData(dispatch);
-    await subscribeToEvents(exchange, dispatch);
+    await loadBlockchainData();
+    subscribeToEvents(web3, exchange, token, account, dispatch);
   }, []);
 
   return (

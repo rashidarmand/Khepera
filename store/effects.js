@@ -60,7 +60,7 @@ export const loadToken = (web3, networkId, dispatch) => {
   return token;
 };
 
-export const loadExchange = async (web3, networkId, dispatch) => {
+export const loadExchange = (web3, networkId, dispatch) => {
   const exchange = new web3.eth.Contract(Exchange.abi, Exchange?.networks[networkId]?.address);
   if (!exchange._address) {
     console.error(
@@ -90,7 +90,7 @@ export const loadAllOrders = async (exchange, dispatch) => {
   dispatch(allOrdersLoaded(allOrders));
 };
 
-export const subscribeToEvents = async (exchange, dispatch) => {
+export const subscribeToEvents = (web3, exchange, token, account, dispatch) => {
   const { Cancel, Trade, Deposit, Withdraw, Order } = exchange.events;
   Cancel()
     .on('data', (event) => {
@@ -104,8 +104,12 @@ export const subscribeToEvents = async (exchange, dispatch) => {
     })
     .on('error', console.error);
 
-  Deposit().on('data', () => dispatch(balancesLoaded()));
-  Withdraw().on('data', () => dispatch(balancesLoaded()));
+  Deposit().on('data', async () => {
+    await loadBalances(web3, exchange, token, account, dispatch);
+  });
+  Withdraw().on('data', async () => {
+    await loadBalances(web3, exchange, token, account, dispatch);
+  });
   Order().on('data', (event) => dispatch(orderCreated(event.returnValues)));
 };
 

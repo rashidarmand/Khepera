@@ -76,3 +76,32 @@ export const tokenWithdrawAmountChanged = (amount) => ({
   type: types.TOKEN_WITHDRAW_AMOUNT_CHANGED,
   payload: amount
 });
+// Buy Orders
+export const buyOrderAmountChanged = (amount) => ({
+  type: types.BUY_ORDER_AMOUNT_CHANGED,
+  payload: amount
+});
+export const buyOrderPriceChanged = (price) => ({
+  type: types.BUY_ORDER_PRICE_CHANGED,
+  payload: price
+});
+export const creatingBuyOrder = () => ({
+  type: types.CREATING_BUY_ORDER
+});
+// Sell Orders
+export const sellOrderAmountChanged = (amount) => ({
+  type: types.SELL_ORDER_AMOUNT_CHANGED,
+  payload: amount
+});
+export const sellOrderPriceChanged = (price) => ({
+  type: types.SELL_ORDER_PRICE_CHANGED,
+  payload: price
+});
+export const creatingSellOrder = () => ({
+  type: types.CREATING_SELL_ORDER
+});
+// Generic Orders
+export const orderCreated = (order) => ({
+  type: types.ORDER_CREATED,
+  payload: order
+});

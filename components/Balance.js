@@ -65,21 +65,21 @@ const TableRows = ({
     onDepositTab: selectedTab === 'Deposit'
   };
   const trWithInputPropsForEther = {
-    depositMethods: {
+    depositHandlers: {
       handleOnChange: (amount) => dispatch(etherDepositAmountChanged(amount)),
       handleOnClick: () => depositEther(etherDepositAmount, exchange, web3, account, dispatch)
     },
-    withdrawMethods: {
+    withdrawHandlers: {
       handleOnChange: (amount) => dispatch(etherWithdrawAmountChanged(amount)),
       handleOnClick: () => withdrawEther(etherWithdrawAmount, exchange, web3, account, dispatch)
     }
   };
   const trWithInputPropsForToken = {
-    depositMethods: {
+    depositHandlers: {
       handleOnChange: (amount) => dispatch(tokenDepositAmountChanged(amount)),
       handleOnClick: () => depositToken(tokenDepositAmount, exchange, token, web3, account, dispatch)
     },
-    withdrawMethods: {
+    withdrawHandlers: {
       handleOnChange: (amount) => dispatch(tokenWithdrawAmountChanged(amount)),
       handleOnClick: () => withdrawToken(tokenWithdrawAmount, exchange, token, web3, account, dispatch)
     }
@@ -102,14 +102,14 @@ const TableRows = ({
   );
 };
 
-const TrWithInput = ({ placeholder, onDepositTab, depositMethods, withdrawMethods }) => {
+const TrWithInput = ({ placeholder, onDepositTab, depositHandlers, withdrawHandlers }) => {
   const showDeposit = () => (
     <>
-      <NumberInput min={0} max={1000} onChange={depositMethods.handleOnChange}>
+      <NumberInput min={0} max={1000} onChange={depositHandlers.handleOnChange}>
         <NumberInputField placeholder={placeholder} />
       </NumberInput>
 
-      <Button colorScheme="purple" variant="outline" size="sm" onClick={depositMethods.handleOnClick}>
+      <Button colorScheme="purple" variant="outline" size="sm" onClick={depositHandlers.handleOnClick}>
         Deposit
       </Button>
     </>
@@ -117,11 +117,11 @@ const TrWithInput = ({ placeholder, onDepositTab, depositMethods, withdrawMethod
 
   const showWithdraw = () => (
     <>
-      <NumberInput min={0} max={1000} onChange={withdrawMethods.handleOnChange}>
+      <NumberInput min={0} max={1000} onChange={withdrawHandlers.handleOnChange}>
         <NumberInputField placeholder={placeholder} />
       </NumberInput>
 
-      <Button colorScheme="purple" variant="outline" size="sm" onClick={withdrawMethods.handleOnClick}>
+      <Button colorScheme="purple" variant="outline" size="sm" onClick={withdrawHandlers.handleOnClick}>
         Withdraw
       </Button>
     </>

@@ -1,16 +1,23 @@
 import Exchange from '@truffle/abis/Exchange.json';
 import Token from '@truffle/abis/Token.json';
+import { ETHER_ADDRESS } from '@utils/helpers';
 import Web3 from 'web3';
 
 import {
   allOrdersLoaded,
+  balancesLoaded,
   cancelledOrdersLoaded,
   cancellingOrder,
+  etherBalanceLoaded,
+  exchangeEtherBalanceLoaded,
   exchangeLoaded,
+  exchangeTokenBalanceLoaded,
   filledOrdersLoaded,
   fillingOrder,
+  loadingBalances,
   orderCancelled,
   orderFilled,
+  tokenBalanceLoaded,
   tokenLoaded,
   web3AccountLoaded,
   web3Loaded
@@ -81,7 +88,7 @@ export const loadAllOrders = async (exchange, dispatch) => {
 };
 
 export const subscribeToEvents = async (exchange, dispatch) => {
-  const { Cancel, Trade } = exchange.events;
+  const { Cancel, Trade, Deposit, Withdraw } = exchange.events;
   Cancel()
     .on('data', (event) => {
       dispatch(orderCancelled(event.returnValues));
@@ -93,6 +100,9 @@ export const subscribeToEvents = async (exchange, dispatch) => {
       dispatch(orderFilled(event.returnValues));
     })
     .on('error', console.error);
+
+  Deposit().on('data', () => dispatch(balancesLoaded()));
+  Withdraw().on('data', () => dispatch(balancesLoaded()));
 };
 
 export const cancelOrder = (exchange, order, account, dispatch) => {
@@ -118,5 +128,91 @@ export const fillOrder = (exchange, order, account, dispatch) => {
     .on('error', (error) => {
       console.error('Fill Order Failure:: ', error);
       alert('there was an error!');
+    });
+};
+
+export const loadBalances = async (web3, exchange, token, account, dispatch) => {
+  if (typeof account !== 'undefined') {
+    // Ether balance in wallet
+    const etherBalance = await web3.eth.getBalance(account);
+    dispatch(etherBalanceLoaded(etherBalance));
+
+    // Token balance in wallet
+    const tokenBalance = await token.methods.balanceOf(account).call();
+    dispatch(tokenBalanceLoaded(tokenBalance));
+
+    // Ether balance in exchange
+    const exchangeEtherBalance = await exchange.methods.balanceOf(ETHER_ADDRESS, account).call();
+    dispatch(exchangeEtherBalanceLoaded(exchangeEtherBalance));
+
+    // Token balance in exchange
+    const exchangeTokenBalance = await exchange.methods.balanceOf(token.options.address, account).call();
+    dispatch(exchangeTokenBalanceLoaded(exchangeTokenBalance));
+
+    // Trigger all balances loaded
+    dispatch(balancesLoaded());
+  } else {
+    alert('Please login with MetaMask');
+  }
+};
+
+export const depositEther = (amount, exchange, web3, account, dispatch) => {
+  amount = web3.utils.toWei(amount, 'ether');
+  exchange.methods
+    .depositEther()
+    .send({ from: account, value: amount })
+    .on('transactionHash', () => {
+      dispatch(loadingBalances());
+    })
+    .on('error', (error) => {
+      console.error(error);
+      alert('There was an error!');
+    });
+};
+
+export const withdrawEther = (amount, exchange, web3, account, dispatch) => {
+  amount = web3.utils.toWei(amount, 'ether');
+  exchange.methods
+    .withdrawEther(amount)
+    .send({ from: account })
+    .on('transactionHash', () => {
+      dispatch(loadingBalances());
+    })
+    .on('error', (error) => {
+      console.error(error);
+      alert('There was an error!');
+    });
+};
+
+export const depositToken = (amount, exchange, token, web3, account, dispatch) => {
+  amount = web3.utils.toWei(amount, 'ether');
+  token.methods
+    .approve(exchange.options.address, amount)
+    .send({ from: account })
+    .on('transactionHash', () => {
+      exchange.methods
+        .depositToken(token.options.address, amount)
+        .send({ from: account })
+        .on('transactionHash', () => {
+          dispatch(loadingBalances());
+        })
+        .on('error', (error) => {
+          console.error(error);
+          alert('There was an error!');
+        });
+    });
+};
+
+export const withdrawToken = (amount, exchange, token, web3, account, dispatch) => {
+  amount = web3.utils.toWei(amount, 'ether');
+  exchange.methods
+    .withdrawToken(token.options.address, amount)
+    .send({ from: account })
+    .on('transactionHash', () => {
+      dispatch(loadingBalances());
+    })
+    .on('error', (error) => {
+      console.error(error);
+      alert('There was an error!');
     });
 };

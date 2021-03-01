@@ -1,16 +1,19 @@
-import { buildGraphData, decorateOrders, ORDER_DECORATION_TYPE } from '@utils/order-decorator-helpers';
+import { buildGraphData, decorateOrders, formatBalance, ORDER_DECORATION_TYPE } from '@utils/order-decorator-helpers';
 import { get, groupBy, reject } from 'lodash';
 import { createSelector } from 'reselect';
+
+export const web3Selector = (state) => get(state, 'web3.connection');
 
 export const accountSelector = (state) => get(state, 'web3.account');
 
 const tokenLoaded = (state) => get(state, 'token.loaded', false);
+export const tokenSelector = (state) => get(state, 'token.contract');
+
 const exchangeLoaded = (state) => get(state, 'exchange.loaded', false);
+export const exchangeSelector = (state) => get(state, 'exchange.contract');
 
 export const contractsLoadedSelector = createSelector(tokenLoaded, exchangeLoaded, (tl, el) => tl && el);
-
-export const exchangeSelector = (state) => get(state, 'exchange.contract');
-// CancelledOrders
+// Cancelled Orders
 export const cancelledOrdersLoadedSelector = (state) => get(state, 'exchange.cancelledOrders.loaded', false);
 export const cancelledOrdersSelector = (state) => get(state, 'exchange.cancelledOrders.data', []);
 // Filled Orders
@@ -87,3 +90,21 @@ export const priceChartSelector = createSelector(filledOrders, (orders) => {
 export const cancellingOrderSelector = (state) => get(state, 'exchange.cancellingOrder', false);
 // Order filling
 export const fillingOrderSelector = (state) => get(state, 'exchange.fillingOrder', false);
+// Balances
+export const loadingBalancesSelector = (state) => get(state, 'exchange.loadingBalances', true);
+export const etherBalanceSelector = createSelector((state) => get(state, 'web3.balance', 0), formatBalance);
+export const tokenBalanceSelector = createSelector((state) => get(state, 'token.balance', 0), formatBalance);
+export const exchangeEtherBalanceSelector = createSelector(
+  (state) => get(state, 'exchange.etherBalance', 0),
+  formatBalance
+);
+export const exchangeTokenBalanceSelector = createSelector(
+  (state) => get(state, 'exchange.tokenBalance', 0),
+  formatBalance
+);
+// Deposits
+export const etherDepositAmountSelector = (state) => get(state, 'exchange.etherDepositAmount', null);
+export const tokenDepositAmountSelector = (state) => get(state, 'exchange.tokenDepositAmount', null);
+// Withdrawals
+export const etherWithdrawAmountSelector = (state) => get(state, 'exchange.etherWithdrawAmount', null);
+export const tokenWithdrawAmountSelector = (state) => get(state, 'exchange.tokenWithdrawAmount', null);

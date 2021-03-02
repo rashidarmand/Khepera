@@ -2,7 +2,7 @@
 
 ## What is Khepera?
 
-In it's current state, Khepera is a decentralized ethereum token exchange running on the Kovan test net that allows you to purchase & sell KHEP (ERC-20) tokens.
+In it's current state, Khepera is a decentralized ethereum token exchange running on the Kovan ethereum test network that allows you to purchase & sell KHEP (ERC-20) tokens.
 
 ## Why did I build it?
 

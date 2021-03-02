@@ -30,7 +30,7 @@ export const loadWeb3 = async (dispatch) => {
   if (typeof window.ethereum !== 'undefined') {
     const web3 = new Web3(window.ethereum);
     dispatch(web3Loaded(web3));
-    await window.ethereum.enable();
+    await window.ethereum.request({ method: 'eth_requestAccounts' });
     return web3;
   } else {
     window.alert('Please install MetaMask');

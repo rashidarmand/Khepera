@@ -34,9 +34,7 @@ const HDWalletProvider = require('@truffle/hdwallet-provider');
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 const privateKeys = process.env.PRIVATE_KEYS || '';
-console.log('PRIVATE KEYSSS::::: ', privateKeys);
 const infuraProjectId = process.env.INFURA_PROJECT_ID;
-console.log('INFURA PROJECT ID::::: ', infuraProjectId);
 module.exports = {
   /**
    * Networks define how you connect to your ethereum client and let you set the

@@ -41,3 +41,5 @@ In order to use Khepera you just need a metamask account & some ethereum on the 
 - Enhance UI (Better Design)
 - Light & Dark Mode
 - Explore adding other application functionality (NFTs, De-Fi, etc.)
+
+### [**Visit Live Site**](https://khepera.vercel.app/)

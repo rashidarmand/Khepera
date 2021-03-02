@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   GridItem,
-  Heading,
   HStack,
   Img,
   Link,

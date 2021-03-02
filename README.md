@@ -12,6 +12,10 @@ I built Khepera as an MVP to show what I've been learning & test out the fundame
 
 The name has its origin in ancient egyptian mythology and means to *"develop"* or *"come into being"*. Khepera symbolizes the manifestation of the rising sun. Khepera is often depicted as a scarab beetle or a man with a scarab beetle for a head. Additional details can be found [here](<https://en.wikipedia.org/wiki/Khepri#:~:text=Khepri%20(Egyptian%3A%20%E1%B8%ABprj%2C%20also,and%20the%20renewal%20of%20life>).
 
+## How to use Khepera
+
+In order to use Khepera you just need a metamask account & some ethereum on the Kovan test network. Head [here](https://gitter.im/kovan-testnet/faucet), sign up with Github, & send the public address for the account you want to receive ethereum on Kovan to get started.
+
 ## Tech Stack
 
 - Solidity
@@ -20,7 +24,7 @@ The name has its origin in ancient egyptian mythology and means to *"develop"* o
 - Redux
 - Mocha & Chai (For Testing Smart Contracts)
 
-## Features
+## MVP Features
 
 - Ethereum Smart Contracts written In Solidity.
 - Smart Contracts tested using Mocha & Chai.
@@ -29,7 +33,7 @@ The name has its origin in ancient egyptian mythology and means to *"develop"* o
 - Next.js frontend with Chakra-UI for styling & Redux for global state management.
 - Exchange & KHEP token contracts are deployed live to the Kovan ethereum test net.
 
-### Future Plans for Khepera
+## Future Plans for Khepera
 
 - More order types (Limit, Market, etc.)
 - Support more ERC-20 tokens

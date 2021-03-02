@@ -3,7 +3,9 @@ require('babel-register')({
   presets: ['env', 'stage-2', 'stage-3']
 });
 require('babel-polyfill');
-require('dotenv').config();
+require('dotenv').config({
+  path: '../.env'
+});
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 
 /**
@@ -32,7 +34,9 @@ const HDWalletProvider = require('@truffle/hdwallet-provider');
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 const privateKeys = process.env.PRIVATE_KEYS || '';
+console.log('PRIVATE KEYSSS::::: ', privateKeys);
 const infuraProjectId = process.env.INFURA_PROJECT_ID;
+console.log('INFURA PROJECT ID::::: ', infuraProjectId);
 module.exports = {
   /**
    * Networks define how you connect to your ethereum client and let you set the
@@ -59,7 +63,11 @@ module.exports = {
     kovan: {
       // HDWalletProvider take 2 arguments
       // [String privateKey, String urlToEthNode]
-      provider: () => new HDWalletProvider(privateKeys.split(','), `https://kovan.infura.io/v3/${infuraProjectId}`),
+      provider: () =>
+        new HDWalletProvider({
+          privateKeys: privateKeys.split(','),
+          providerOrUrl: `https://kovan.infura.io/v3/${infuraProjectId}`
+        }),
       gas: 5000000,
       gasPrice: 25000000000,
       network_id: 42

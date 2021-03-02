@@ -15,10 +15,12 @@
   "tr:m": "cd truffle && truffle migrate",
   "tr:mk": "cd truffle && truffle migrate --network kovan",
   "tr:mr": "cd truffle && truffle migrate --reset",
-  "tr:mrk": "cd truffle && truffle migrate --reset --netwok kovan",
+  "tr:mrk": "cd truffle && truffle migrate --reset --network kovan",
+  "tr:setup": "run-s tr:mr tr:e:seed",
   "tr:e:seed": "cd truffle && truffle exec scripts/seed-exchange.js",
-  "tr:e:seed-k": "cd truffle && truffle exec scripts/seed-exchange.js",
-  "tr:setup": "run-s tr:mr tr:e:seed"
+  "tr:e:seed-k": "cd truffle && truffle exec scripts/seed-exchange.js --network kovan",
+  "tr:setup-k": "run-s tr:mrk tr:e:seed-k",
+	"tr:n": "cd truffle && truffle networks"
  },
  "dependencies": {
   "@chakra-ui/icons": "^1.0.5",

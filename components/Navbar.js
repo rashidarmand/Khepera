@@ -5,6 +5,7 @@ import {
   GridItem,
   Heading,
   HStack,
+  Img,
   Link,
   Modal,
   ModalBody,
@@ -83,14 +84,13 @@ const Navbar = () => {
     <GridItem
       bgGradient="linear-gradient(120deg, #7028e4 0%, #e5b2ca 55%, #7028e4 100%)"
       w="100%"
-      p={4}
       color="white"
       shadow="md"
     >
-      <HStack>
-        <Heading size="lg" flexGrow="1">
-          Khepera Token Exchange
-        </Heading>
+      <HStack h="100%" px={4}>
+        <Box h="100%" flexGrow="1">
+          <Img h="100%" src="/khepera-Logo-white.svg" alt="Khepera-Logo" />
+        </Box>
 
         <WalletConnection openModal={onOpen} dispatch={dispatch} account={account} />
 

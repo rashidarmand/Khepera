@@ -22,7 +22,8 @@ In order to use Khepera you just need a metamask account & some ethereum on the 
 - Next.js
 - Chakra-UI
 - Redux
-- Mocha & Chai (For Testing Smart Contracts)
+- Mocha & Chai (for testing smart contracts)
+- Vercel (deployment)
 
 ## MVP Features
 

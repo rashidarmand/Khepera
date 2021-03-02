@@ -1,8 +1,10 @@
+/* eslint-disable no-undef */
 require('babel-register')({
   presets: ['env', 'stage-2', 'stage-3']
 });
 require('babel-polyfill');
 require('dotenv').config();
+const HDWalletProvider = require('@truffle/hdwallet-provider');
 
 /**
  * Use this file to configure your truffle project. It's seeded with some
@@ -29,7 +31,8 @@ require('dotenv').config();
 //
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
-
+const privateKeys = process.env.PRIVATE_KEYS || '';
+const infuraProjectId = process.env.INFURA_PROJECT_ID;
 module.exports = {
   /**
    * Networks define how you connect to your ethereum client and let you set the
@@ -52,6 +55,14 @@ module.exports = {
       host: '127.0.0.1', // Localhost (default: none)
       port: 7545, // Standard Ethereum port (default: none)
       network_id: '*' // Any network (default: none)
+    },
+    kovan: {
+      // HDWalletProvider take 2 arguments
+      // [String privateKey, String urlToEthNode]
+      provider: () => new HDWalletProvider(privateKeys.split(','), `https://kovan.infura.io/v3/${infuraProjectId}`),
+      gas: 5000000,
+      gasPrice: 25000000000,
+      network_id: 42
     }
     // Another network with more advanced options...
     // advanced: {

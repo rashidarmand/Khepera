@@ -13,8 +13,11 @@
   "tr:t:token": "cd truffle && truffle test ./test/Token.test.js",
   "tr:t:exchange": "cd truffle && truffle test ./test/Exchange.test.js",
   "tr:m": "cd truffle && truffle migrate",
+  "tr:mk": "cd truffle && truffle migrate --network kovan",
   "tr:mr": "cd truffle && truffle migrate --reset",
+  "tr:mrk": "cd truffle && truffle migrate --reset --netwok kovan",
   "tr:e:seed": "cd truffle && truffle exec scripts/seed-exchange.js",
+  "tr:e:seed-k": "cd truffle && truffle exec scripts/seed-exchange.js",
   "tr:setup": "run-s tr:mr tr:e:seed"
  },
  "dependencies": {

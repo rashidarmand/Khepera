@@ -7,8 +7,15 @@ import reducers from './reducers';
 
 let store;
 
+const middleware = [];
+
+if (process.env.NODE_ENV === 'development') {
+  const logger = createLogger();
+  middleware.push(logger);
+}
+
 function initStore(initialState) {
-  return createStore(reducers, initialState, composeWithDevTools(applyMiddleware(createLogger())));
+  return createStore(reducers, initialState, composeWithDevTools(applyMiddleware(...middleware)));
 }
 
 export const initializeStore = (preloadedState) => {

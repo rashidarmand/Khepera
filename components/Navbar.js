@@ -88,7 +88,7 @@ const Navbar = () => {
     >
       <HStack h="100%" px={4}>
         <Box h="100%" flexGrow="1">
-          <Img h="100%" src="/khepera-Logo-white.svg" alt="Khepera-Logo" />
+          <Img h="100%" src="/khepera-logo-white.svg" alt="Khepera-Logo" />
         </Box>
 
         <WalletConnection openModal={onOpen} dispatch={dispatch} account={account} />
